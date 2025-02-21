@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="it">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test per alpi</title>
+    <title>Mappa 3D con edifici</title>
     <script src="https://unpkg.com/maplibre-gl/dist/maplibre-gl.js"></script>
     <link href="https://unpkg.com/maplibre-gl/dist/maplibre-gl.css" rel="stylesheet" />
     <style>
@@ -17,36 +17,15 @@
     <script>
         const map = new maplibregl.Map({
             container: 'map',
-            style: 'https://demotiles.maplibre.org/style.json', // Stile simile a Mapbox
+            style: 'https://maps.tilehosting.com/styles/basic/style.json?key=free', // Stile con edifici
             center: [12.4964, 41.9028], // Roma
-            zoom: 14, // Zoom sulla città
-            pitch: 60, // Angolazione 3D
-            bearing: 0, // Rotazione iniziale
+            zoom: 15, 
+            pitch: 60, 
+            bearing: 0, 
             antialias: true
         });
 
-        // Aggiunge i controlli di navigazione
         map.addControl(new maplibregl.NavigationControl());
-
-        // Quando la mappa è caricata, aggiunge gli edifici 3D
-        map.on('load', () => {
-            map.addLayer({
-                'id': '3d-buildings',
-                'type': 'fill-extrusion',
-                'source': 'composite',
-                'source-layer': 'building',
-                'minzoom': 14,
-                'paint': {
-                    'fill-extrusion-color': '#aaa',
-                    'fill-extrusion-height': [
-                        'interpolate', ['linear'], ['zoom'],
-                        14, 0,
-                        16, ['get', 'height']
-                    ],
-                    'fill-extrusion-opacity': 0.7
-                }
-            });
-        });
     </script>
 </body>
 </html>
