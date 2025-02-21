@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mappa 3D con edifici</title>
+    <title>Mappa 3D con altezze reali</title>
     <script src="https://unpkg.com/maplibre-gl/dist/maplibre-gl.js"></script>
     <link href="https://unpkg.com/maplibre-gl/dist/maplibre-gl.css" rel="stylesheet" />
     <style>
@@ -15,39 +15,92 @@
     <div id="map"></div>
 
     <script>
-        const API_KEY = 'e9pLQRlbmlvafLyJ6L8B'; // <-- Sostituisci con la tua API Key di MapTiler
+        const API_KEY = 'e9pLQRlbmlvafLyJ6L8B'; 
 
-        const map = new maplibregl.Map({
-            container: 'map',
-            style: `https://api.maptiler.com/maps/streets/style.json?key=${API_KEY}`,
-            center: [12.4964, 41.9028], // Roma
-            zoom: 15, 
-            pitch: 60, 
-            bearing: 0, 
-            antialias: true
-        });
+        // Funzione per ottenere la posizione geolocalizzata
+        function onLocationFound(position) {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
 
-        map.addControl(new maplibregl.NavigationControl());
-
-        // Aggiunge edifici 3D
-        map.on('load', () => {
-            map.addLayer({
-                'id': '3d-buildings',
-                'type': 'fill-extrusion',
-                'source': 'openmaptiles',
-                'source-layer': 'building',
-                'minzoom': 14,
-                'paint': {
-                    'fill-extrusion-color': '#aaa',
-                    'fill-extrusion-height': [
-                        'interpolate', ['linear'], ['zoom'],
-                        14, 0,
-                        16, ['get', 'height']
-                    ],
-                    'fill-extrusion-opacity': 0.7
-                }
+            const map = new maplibregl.Map({
+                container: 'map',
+                style: `https://api.maptiler.com/maps/streets/style.json?key=${API_KEY}`,
+                center: [lon, lat], // Imposta la posizione iniziale sulla posizione dell'utente
+                zoom: 15,
+                pitch: 30,
+                bearing: 0,
+                antialias: true
             });
-        });
+
+            map.addControl(new maplibregl.NavigationControl());
+
+            // Aggiunge edifici 3D con altezze realistiche
+            map.on('load', () => {
+                map.addLayer({
+                    'id': '3d-buildings',
+                    'type': 'fill-extrusion',
+                    'source': 'openmaptiles',
+                    'source-layer': 'building',
+                    'minzoom': 14,
+                    'paint': {
+                        'fill-extrusion-color': '#aaa', // Colore degli edifici
+                        'fill-extrusion-height': [
+                            'case',
+                            ['has', 'height'], ['get', 'height'], // Usa altezza reale se disponibile
+                            ['has', 'levels'], ['*', ['get', 'levels'], 3], // Se non c'è, moltiplica i piani x3m
+                            10 // Se mancano entrambi, assegna altezza minima di 10m
+                        ],
+                        'fill-extrusion-base': 0, 
+                        'fill-extrusion-opacity': 0.8
+                    }
+                });
+            });
+        }
+
+        // Funzione per gestire il caso in cui la geolocalizzazione non sia disponibile
+        function onLocationError() {
+            alert("Impossibile ottenere la tua posizione. La mappa verrà centrata su Roma.");
+            const map = new maplibregl.Map({
+                container: 'map',
+                style: `https://api.maptiler.com/maps/streets/style.json?key=${API_KEY}`,
+                center: [12.4964, 41.9028], // Roma
+                zoom: 15,
+                pitch: 60,
+                bearing: 0,
+                antialias: true
+            });
+
+            map.addControl(new maplibregl.NavigationControl());
+
+            // Aggiunge edifici 3D con altezze realistiche
+            map.on('load', () => {
+                map.addLayer({
+                    'id': '3d-buildings',
+                    'type': 'fill-extrusion',
+                    'source': 'openmaptiles',
+                    'source-layer': 'building',
+                    'minzoom': 14,
+                    'paint': {
+                        'fill-extrusion-color': '#aaa', // Colore degli edifici
+                        'fill-extrusion-height': [
+                            'case',
+                            ['has', 'height'], ['get', 'height'], // Usa altezza reale se disponibile
+                            ['has', 'levels'], ['*', ['get', 'levels'], 3], // Se non c'è, moltiplica i piani x3m
+                            10 // Se mancano entrambi, assegna altezza minima di 10m
+                        ],
+                        'fill-extrusion-base': 0, 
+                        'fill-extrusion-opacity': 0.8
+                    }
+                });
+            });
+        }
+
+        // Chiamata alla geolocalizzazione
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(onLocationFound, onLocationError);
+        } else {
+            onLocationError();
+        }
     </script>
 </body>
 </html>
