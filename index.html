@@ -3,20 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mappa 3D con altezze reali e posizione in tempo reale</title>
+    <title>Test Geolocalizzazione con Marker</title>
     <script src="https://unpkg.com/maplibre-gl/dist/maplibre-gl.js"></script>
     <link href="https://unpkg.com/maplibre-gl/dist/maplibre-gl.css" rel="stylesheet" />
     <style>
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; }
         #map { width: 100%; height: 100vh; }
-        .marker {
-            background-color: red;
-            border-radius: 50%;
-            width: 15px;
-            height: 15px;
-            display: block;
-            transform: translate(-50%, -50%);
-        }
     </style>
 </head>
 <body>
@@ -24,9 +16,8 @@
 
     <script>
         const API_KEY = 'e9pLQRlbmlvafLyJ6L8B'; // Sostituisci con la tua API Key di MapTiler
-
         let map;
-        let userMarker;
+        let userMarker = null;
 
         // Funzione per ottenere la posizione geolocalizzata
         function onLocationFound(position) {
@@ -38,14 +29,14 @@
                 style: `https://api.maptiler.com/maps/streets/style.json?key=${API_KEY}`,
                 center: [lon, lat], // Imposta la posizione iniziale sulla posizione dell'utente
                 zoom: 15,
-                pitch: 60,
+                pitch: 45,
                 bearing: 0,
                 antialias: true
             });
 
             map.addControl(new maplibregl.NavigationControl());
 
-            // Aggiunge edifici 3D con altezze realistiche
+            // Aggiungi edifici 3D con altezze realistiche
             map.on('load', () => {
                 map.addLayer({
                     'id': '3d-buildings',
@@ -66,9 +57,9 @@
                     }
                 });
 
-                // Aggiungi il marker per la posizione dell'utente
+                // Crea il marker per la posizione dell'utente
                 userMarker = new maplibregl.Marker({ color: 'red' })
-                    .setLngLat([lon, lat])
+                    .setLngLat([lon, lat])  // Posiziona il marker inizialmente
                     .addTo(map);
             });
 
@@ -77,8 +68,10 @@
                 const lat = position.coords.latitude;
                 const lon = position.coords.longitude;
 
-                // Sposta il marker nella nuova posizione
-                userMarker.setLngLat([lon, lat]);
+                // Se il marker esiste, aggiorna la sua posizione
+                if (userMarker) {
+                    userMarker.setLngLat([lon, lat]);  // Aggiorna la posizione del marker
+                }
 
                 // Centra la mappa sulla nuova posizione
                 map.setCenter([lon, lat]);
@@ -89,48 +82,16 @@
         }
 
         // Funzione per gestire il caso in cui la geolocalizzazione non sia disponibile
-        function onLocationError() {
-            alert("Impossibile ottenere la tua posizione. La mappa verrà centrata su Roma.");
-            map = new maplibregl.Map({
-                container: 'map',
-                style: `https://api.maptiler.com/maps/streets/style.json?key=${API_KEY}`,
-                center: [12.4964, 41.9028], // Roma
-                zoom: 15,
-                pitch: 45,
-                bearing: 0,
-                antialias: true
-            });
-
-            map.addControl(new maplibregl.NavigationControl());
-
-            // Aggiunge edifici 3D con altezze realistiche
-            map.on('load', () => {
-                map.addLayer({
-                    'id': '3d-buildings',
-                    'type': 'fill-extrusion',
-                    'source': 'openmaptiles',
-                    'source-layer': 'building',
-                    'minzoom': 14,
-                    'paint': {
-                        'fill-extrusion-color': '#aaa', // Colore degli edifici
-                        'fill-extrusion-height': [
-                            'case',
-                            ['has', 'height'], ['get', 'height'], // Usa altezza reale se disponibile
-                            ['has', 'levels'], ['*', ['get', 'levels'], 3], // Se non c'è, moltiplica i piani x3m
-                            10 // Se mancano entrambi, assegna altezza minima di 10m
-                        ],
-                        'fill-extrusion-base': 0, 
-                        'fill-extrusion-opacity': 0.8
-                    }
-                });
-            });
+        function onLocationError(error) {
+            console.error(error); // Log dell'errore
+            alert("Impossibile ottenere la tua posizione.");
         }
 
         // Chiamata alla geolocalizzazione
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(onLocationFound, onLocationError);
         } else {
-            onLocationError();
+            alert("Geolocalizzazione non supportata dal tuo browser.");
         }
     </script>
 </body>
