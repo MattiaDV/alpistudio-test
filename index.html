@@ -21,6 +21,7 @@
 
         // Funzione per ottenere la posizione geolocalizzata
         function onLocationFound(position) {
+            console.log("Posizione trovata:", position);  // Log della posizione trovata
             const lat = position.coords.latitude;
             const lon = position.coords.longitude;
 
@@ -29,7 +30,7 @@
                 style: `https://api.maptiler.com/maps/streets/style.json?key=${API_KEY}`,
                 center: [lon, lat], // Imposta la posizione iniziale sulla posizione dell'utente
                 zoom: 15,
-                pitch: 45,
+                pitch: 60,
                 bearing: 0,
                 antialias: true
             });
@@ -65,6 +66,7 @@
 
             // Funzione per aggiornare la posizione in tempo reale
             function updatePosition(position) {
+                console.log("Posizione aggiornata:", position);  // Log della posizione aggiornata
                 const lat = position.coords.latitude;
                 const lon = position.coords.longitude;
 
@@ -78,18 +80,18 @@
             }
 
             // Ascolta gli aggiornamenti della posizione
-            navigator.geolocation.watchPosition(updatePosition);
+            navigator.geolocation.watchPosition(updatePosition, onLocationError, { enableHighAccuracy: true });
         }
 
         // Funzione per gestire il caso in cui la geolocalizzazione non sia disponibile
         function onLocationError(error) {
-            console.error(error); // Log dell'errore
+            console.error("Errore geolocalizzazione:", error); // Log dell'errore
             alert("Impossibile ottenere la tua posizione.");
         }
 
         // Chiamata alla geolocalizzazione
         if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(onLocationFound, onLocationError);
+            navigator.geolocation.getCurrentPosition(onLocationFound, onLocationError, { enableHighAccuracy: true });
         } else {
             alert("Geolocalizzazione non supportata dal tuo browser.");
         }
