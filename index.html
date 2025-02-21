@@ -34,14 +34,13 @@
         const API_KEY = 'e9pLQRlbmlvafLyJ6L8B'; // Sostituisci con la tua API Key di MapTiler
         let map;
         let userMarker = null;
-        let firstLoad = true; // Variabile per centrare solo all'inizio
+        let firstLoad = true;
 
         function onLocationFound(position) {
             console.log("Posizione trovata:", position);
             const lat = position.coords.latitude;
             const lon = position.coords.longitude;
 
-            // Se è il primo caricamento, inizializza la mappa centrata sull'utente
             if (firstLoad) {
                 map = new maplibregl.Map({
                     container: 'map',
@@ -55,7 +54,6 @@
 
                 map.addControl(new maplibregl.NavigationControl());
 
-                // Aggiungi edifici 3D
                 map.on('load', () => {
                     map.addLayer({
                         'id': '3d-buildings',
@@ -75,17 +73,17 @@
                             'fill-extrusion-opacity': 0.8
                         }
                     });
-
-                    // Crea il marker per la posizione dell'utente
-                    userMarker = new maplibregl.Marker({ color: 'red' })
-                        .setLngLat([lon, lat])
-                        .addTo(map);
                 });
 
-                firstLoad = false; // Impedisce ulteriori centraggi automatici
+                // Creiamo il marker una sola volta
+                userMarker = new maplibregl.Marker({ color: 'red' })
+                    .setLngLat([lon, lat])
+                    .addTo(map);
+
+                firstLoad = false;
             }
 
-            // Ascolta gli aggiornamenti della posizione SENZA ricentrare la mappa
+            // Inizia a seguire gli aggiornamenti della posizione
             navigator.geolocation.watchPosition(updatePosition, onLocationError, { enableHighAccuracy: true });
         }
 
@@ -94,7 +92,7 @@
             const lat = position.coords.latitude;
             const lon = position.coords.longitude;
 
-            // Se il marker esiste, aggiorna la posizione SENZA ricentrare la mappa
+            // Se il marker esiste, aggiorniamo solo la sua posizione
             if (userMarker) {
                 userMarker.setLngLat([lon, lat]);
             }
@@ -117,4 +115,3 @@
     </script>
 </body>
 </html>
-
