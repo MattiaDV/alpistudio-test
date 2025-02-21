@@ -15,9 +15,11 @@
     <div id="map"></div>
 
     <script>
+        const API_KEY = e9pLQRlbmlvafLyJ6L8B; // <-- Sostituisci con la tua API Key di MapTiler
+
         const map = new maplibregl.Map({
             container: 'map',
-            style: 'https://maps.tilehosting.com/styles/basic/style.json?key=free', // Stile con edifici
+            style: `https://api.maptiler.com/maps/streets/style.json?key=${API_KEY}`,
             center: [12.4964, 41.9028], // Roma
             zoom: 15, 
             pitch: 60, 
@@ -26,6 +28,26 @@
         });
 
         map.addControl(new maplibregl.NavigationControl());
+
+        // Aggiunge edifici 3D
+        map.on('load', () => {
+            map.addLayer({
+                'id': '3d-buildings',
+                'type': 'fill-extrusion',
+                'source': 'openmaptiles',
+                'source-layer': 'building',
+                'minzoom': 14,
+                'paint': {
+                    'fill-extrusion-color': '#aaa',
+                    'fill-extrusion-height': [
+                        'interpolate', ['linear'], ['zoom'],
+                        14, 0,
+                        16, ['get', 'height']
+                    ],
+                    'fill-extrusion-opacity': 0.7
+                }
+            });
+        });
     </script>
 </body>
 </html>
