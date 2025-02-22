@@ -59,7 +59,7 @@
                     });
                 });
 
-                // Creiamo il marker una sola volta
+                // Creiamo il marker per la posizione dell'utente
                 userMarker = new maplibregl.Marker({ color: 'red' })
                     .setLngLat([lon, lat])
                     .addTo(map);
@@ -95,8 +95,26 @@
             }
         }
 
-        // Avvia automaticamente la geolocalizzazione appena la pagina si carica
-        window.onload = startGeolocation;
+        // Funzione per aggiungere un marker personalizzato quando si clicca sulla mappa
+        function addCustomMarker(event) {
+            const coords = event.lngLat;
+            const marker = new maplibregl.Marker({ color: 'blue' }) // Marker blu personalizzato
+                .setLngLat([coords.lng, coords.lat])
+                .addTo(map);
+
+            // Aggiungiamo un popup con un messaggio personalizzato
+            const popup = new maplibregl.Popup({ offset: 25 })
+                .setHTML(`<b>Punto di interesse</b><br>Long: ${coords.lng.toFixed(5)}<br>Lat: ${coords.lat.toFixed(5)}`);
+            marker.setPopup(popup);
+        }
+
+        // Assegniamo la funzione al click sulla mappa
+        document.addEventListener("DOMContentLoaded", () => {
+            startGeolocation();
+            setTimeout(() => {
+                if (map) map.on('click', addCustomMarker);
+            }, 2000); // Aspettiamo un attimo per essere sicuri che la mappa sia pronta
+        });
     </script>
 </body>
 </html>
