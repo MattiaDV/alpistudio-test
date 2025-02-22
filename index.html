@@ -19,10 +19,9 @@
         let map;
         let userMarker = null;
         let firstLoad = true;
-        let savedMarkers = JSON.parse(localStorage.getItem('markers')) || []; // Carica i marker salvati
+        let savedMarkers = JSON.parse(localStorage.getItem('markers')) || [];
 
         function onLocationFound(position) {
-            console.log("Posizione trovata:", position);
             const lat = position.coords.latitude;
             const lon = position.coords.longitude;
 
@@ -39,34 +38,13 @@
 
                 map.addControl(new maplibregl.NavigationControl());
 
-                map.on('load', () => {
-                    map.addLayer({
-                        'id': '3d-buildings',
-                        'type': 'fill-extrusion',
-                        'source': 'openmaptiles',
-                        'source-layer': 'building',
-                        'minzoom': 14,
-                        'paint': {
-                            'fill-extrusion-color': '#aaa',
-                            'fill-extrusion-height': [
-                                'case',
-                                ['has', 'height'], ['get', 'height'], 
-                                ['has', 'levels'], ['*', ['get', 'levels'], 3], 
-                                10 
-                            ],
-                            'fill-extrusion-base': 0, 
-                            'fill-extrusion-opacity': 0.8
-                        }
-                    });
-
-                    // Ricarica i marker salvati
-                    loadSavedMarkers();
-                });
-
-                // Marker della posizione attuale
                 userMarker = new maplibregl.Marker({ color: 'red' })
                     .setLngLat([lon, lat])
                     .addTo(map);
+
+                map.on('load', () => {
+                    loadSavedMarkers();
+                });
 
                 firstLoad = false;
             }
@@ -75,7 +53,6 @@
         }
 
         function updatePosition(position) {
-            console.log("Posizione aggiornata:", position);
             const lat = position.coords.latitude;
             const lon = position.coords.longitude;
             if (userMarker) {
@@ -96,17 +73,14 @@
             }
         }
 
-        function addMarkerOnPOI(event) {
+        async function addMarkerOnPOI(event) {
             const coords = event.lngLat;
-            const features = map.queryRenderedFeatures(event.point, { layers: ['poi-label'] });
+            const poi = await getNearestPOI(coords.lng, coords.lat);
 
-            if (features.length > 0) {
-                const poi = features[0];
-                const poiName = poi.properties.name || "Punto di interesse";
-                const category = poi.properties.class || "default"; // Categoria POI
+            if (poi) {
+                const poiName = poi.name;
+                const category = poi.category;
                 const iconUrl = getIconForCategory(category);
-
-                console.log("POI trovato:", poi);
 
                 const markerEl = document.createElement('div');
                 markerEl.style.width = "30px";
@@ -119,18 +93,35 @@
                     .setPopup(new maplibregl.Popup().setHTML(`<b>${poiName}</b>`))
                     .addTo(map);
 
-                // Salva il marker nel localStorage
                 savedMarkers.push({ lat: coords.lat, lon: coords.lng, name: poiName, category });
                 localStorage.setItem('markers', JSON.stringify(savedMarkers));
 
-                // Permette di rimuovere il marker con un doppio click
                 markerEl.addEventListener('dblclick', () => {
                     marker.remove();
                     savedMarkers = savedMarkers.filter(m => m.lat !== coords.lat && m.lon !== coords.lng);
                     localStorage.setItem('markers', JSON.stringify(savedMarkers));
                 });
             } else {
-                console.log("Nessun POI trovato qui.");
+                alert("Nessun punto di interesse trovato qui!");
+            }
+        }
+
+        async function getNearestPOI(lon, lat) {
+            try {
+                const response = await fetch(`https://api.maptiler.com/geocoding/${lon},${lat}.json?key=${API_KEY}&types=poi`);
+                const data = await response.json();
+
+                if (data.features.length > 0) {
+                    const poi = data.features[0];
+                    return {
+                        name: poi.text || "POI sconosciuto",
+                        category: poi.properties?.category || "default"
+                    };
+                }
+                return null;
+            } catch (error) {
+                console.error("Errore nella richiesta API:", error);
+                return null;
             }
         }
 
