@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test Geolocalizzazione con Marker</title>
+    <title>Mappa con POI Personalizzati</title>
     <script src="https://unpkg.com/maplibre-gl/dist/maplibre-gl.js"></script>
     <link href="https://unpkg.com/maplibre-gl/dist/maplibre-gl.css" rel="stylesheet" />
     <style>
@@ -19,6 +19,7 @@
         let map;
         let userMarker = null;
         let firstLoad = true;
+        let savedMarkers = JSON.parse(localStorage.getItem('markers')) || []; // Carica i marker salvati
 
         function onLocationFound(position) {
             console.log("Posizione trovata:", position);
@@ -57,9 +58,12 @@
                             'fill-extrusion-opacity': 0.8
                         }
                     });
+
+                    // Ricarica i marker salvati
+                    loadSavedMarkers();
                 });
 
-                // Creiamo il marker per la posizione dell'utente
+                // Marker della posizione attuale
                 userMarker = new maplibregl.Marker({ color: 'red' })
                     .setLngLat([lon, lat])
                     .addTo(map);
@@ -67,7 +71,6 @@
                 firstLoad = false;
             }
 
-            // Inizia a seguire gli aggiornamenti della posizione
             navigator.geolocation.watchPosition(updatePosition, onLocationError, { enableHighAccuracy: true });
         }
 
@@ -75,8 +78,6 @@
             console.log("Posizione aggiornata:", position);
             const lat = position.coords.latitude;
             const lon = position.coords.longitude;
-
-            // Se il marker esiste, aggiorniamo solo la sua posizione
             if (userMarker) {
                 userMarker.setLngLat([lon, lat]);
             }
@@ -95,25 +96,80 @@
             }
         }
 
-        // Funzione per aggiungere un marker personalizzato quando si clicca sulla mappa
-        function addCustomMarker(event) {
+        function addMarkerOnPOI(event) {
             const coords = event.lngLat;
-            const marker = new maplibregl.Marker({ color: 'blue' }) // Marker blu personalizzato
-                .setLngLat([coords.lng, coords.lat])
-                .addTo(map);
+            const features = map.queryRenderedFeatures(event.point, { layers: ['poi-label'] });
 
-            // Aggiungiamo un popup con un messaggio personalizzato
-            const popup = new maplibregl.Popup({ offset: 25 })
-                .setHTML(`<b>Punto di interesse</b><br>Long: ${coords.lng.toFixed(5)}<br>Lat: ${coords.lat.toFixed(5)}`);
-            marker.setPopup(popup);
+            if (features.length > 0) {
+                const poi = features[0];
+                const poiName = poi.properties.name || "Punto di interesse";
+                const category = poi.properties.class || "default"; // Categoria POI
+                const iconUrl = getIconForCategory(category);
+
+                console.log("POI trovato:", poi);
+
+                const markerEl = document.createElement('div');
+                markerEl.style.width = "30px";
+                markerEl.style.height = "30px";
+                markerEl.style.backgroundSize = "cover";
+                markerEl.style.backgroundImage = `url(${iconUrl})`;
+
+                const marker = new maplibregl.Marker({ element: markerEl })
+                    .setLngLat([coords.lng, coords.lat])
+                    .setPopup(new maplibregl.Popup().setHTML(`<b>${poiName}</b>`))
+                    .addTo(map);
+
+                // Salva il marker nel localStorage
+                savedMarkers.push({ lat: coords.lat, lon: coords.lng, name: poiName, category });
+                localStorage.setItem('markers', JSON.stringify(savedMarkers));
+
+                // Permette di rimuovere il marker con un doppio click
+                markerEl.addEventListener('dblclick', () => {
+                    marker.remove();
+                    savedMarkers = savedMarkers.filter(m => m.lat !== coords.lat && m.lon !== coords.lng);
+                    localStorage.setItem('markers', JSON.stringify(savedMarkers));
+                });
+            } else {
+                console.log("Nessun POI trovato qui.");
+            }
         }
 
-        // Assegniamo la funzione al click sulla mappa
+        function getIconForCategory(category) {
+            const icons = {
+                restaurant: 'https://cdn-icons-png.flaticon.com/512/3075/3075977.png',
+                bank: 'https://cdn-icons-png.flaticon.com/512/1554/1554567.png',
+                shop: 'https://cdn-icons-png.flaticon.com/512/1161/1161388.png',
+                default: 'https://cdn-icons-png.flaticon.com/512/684/684908.png'
+            };
+            return icons[category] || icons['default'];
+        }
+
+        function loadSavedMarkers() {
+            savedMarkers.forEach(markerData => {
+                const markerEl = document.createElement('div');
+                markerEl.style.width = "30px";
+                markerEl.style.height = "30px";
+                markerEl.style.backgroundSize = "cover";
+                markerEl.style.backgroundImage = `url(${getIconForCategory(markerData.category)})`;
+
+                const marker = new maplibregl.Marker({ element: markerEl })
+                    .setLngLat([markerData.lon, markerData.lat])
+                    .setPopup(new maplibregl.Popup().setHTML(`<b>${markerData.name}</b>`))
+                    .addTo(map);
+
+                markerEl.addEventListener('dblclick', () => {
+                    marker.remove();
+                    savedMarkers = savedMarkers.filter(m => m.lat !== markerData.lat && m.lon !== markerData.lon);
+                    localStorage.setItem('markers', JSON.stringify(savedMarkers));
+                });
+            });
+        }
+
         document.addEventListener("DOMContentLoaded", () => {
             startGeolocation();
             setTimeout(() => {
-                if (map) map.on('click', addCustomMarker);
-            }, 2000); // Aspettiamo un attimo per essere sicuri che la mappa sia pronta
+                if (map) map.on('click', addMarkerOnPOI);
+            }, 2000);
         });
     </script>
 </body>
