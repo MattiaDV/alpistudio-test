@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mappa con POI Alimentari</title>
+  <title>Mappa con POI Alimentari e Modalità Satellite</title>
   <script src="https://unpkg.com/maplibre-gl/dist/maplibre-gl.js"></script>
   <link href="https://unpkg.com/maplibre-gl/dist/maplibre-gl.css" rel="stylesheet" />
   <style>
@@ -12,6 +12,7 @@
       padding: 0;
       width: 100%;
       height: 100%;
+      position: relative;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -21,28 +22,40 @@
       height: 300px;
       position: relative;
     }
+    #toggle-style {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 1000;
+      padding: 5px 10px;
+      background: rgba(255,255,255,0.8);
+      border: none;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
   <div id="map"></div>
+  <button id="toggle-style">Satellite</button>
   <script>
     const API_KEY = 'e9pLQRlbmlvafLyJ6L8B'; // Sostituisci con la tua API Key di MapTiler
     let map;
     let userMarker = null;
     let firstLoad = true;
     let savedMarkers = JSON.parse(localStorage.getItem('markers')) || [];
+    let currentStyle = 'streets'; // stile attuale
 
     // Formula di Haversine per calcolare la distanza in metri
     function computeDistance(lat1, lon1, lat2, lon2) {
-      const R = 6371000; // raggio della Terra in metri
+      const R = 6371000;
       const φ1 = lat1 * Math.PI / 180;
       const φ2 = lat2 * Math.PI / 180;
       const Δφ = (lat2 - lat1) * Math.PI / 180;
       const Δλ = (lon2 - lon1) * Math.PI / 180;
-      const a = Math.sin(Δφ / 2) ** 2 +
+      const a = Math.sin(Δφ/2) ** 2 +
                 Math.cos(φ1) * Math.cos(φ2) *
-                Math.sin(Δλ / 2) ** 2;
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                Math.sin(Δλ/2) ** 2;
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
       return R * c;
     }
 
@@ -60,7 +73,7 @@
           antialias: true
         });
         map.addControl(new maplibregl.NavigationControl());
-        // Gestione immagini mancanti per alcuni sprite
+        // Gestione degli sprite mancanti
         map.on('styleimagemissing', function(e) {
           if (e.id === 'office_11' || e.id === 'atm_11') {
             const canvas = document.createElement('canvas');
@@ -72,7 +85,7 @@
             map.addImage(e.id, canvas);
           }
         });
-        // Marker per la posizione utente
+        // Marker della posizione utente
         userMarker = new maplibregl.Marker({ color: 'red' })
           .setLngLat([lon, lat])
           .addTo(map);
@@ -105,27 +118,29 @@
       }
     }
 
-    // Funzione che restituisce il POI più vicino (entro 50 metri) solo se legato al cibo/ristorazione
+    // Restituisce il POI più vicino (entro 50 metri) solo se legato al cibo/ristorazione.
     async function getNearestPOI(lon, lat) {
       try {
         const response = await fetch(`https://api.maptiler.com/geocoding/${lon},${lat}.json?key=${API_KEY}&types=poi`);
         const data = await response.json();
         if (data.features.length > 0) {
           const poi = data.features[0];
-          const poiCoords = poi.geometry.coordinates; // [lon, lat]
+          const poiCoords = poi.geometry.coordinates;
           const distance = computeDistance(lat, lon, poiCoords[1], poiCoords[0]);
-          if (distance <= 50) {  // soglia di 50 metri
-            // Otteniamo la categoria, provando sia la proprietà che il testo
+          if (distance <= 50) {
+            // Otteniamo la categoria dal campo properties.category o dal testo.
             let poiCategory = "";
             if (poi.properties && poi.properties.category) {
               poiCategory = poi.properties.category.toLowerCase();
-            } else if (poi.text) {
+            }
+            if (!poiCategory && poi.text) {
               poiCategory = poi.text.toLowerCase();
             }
-            // Lista di parole chiave consentite
-            const allowedKeywords = ["restaurant", "fast food", "bar", "cafe", "pub", "autogrill", "tavola calda", "trattoria", "osteria", "pizzeria"];
+            // Parole chiave ammesse (in inglese e italiano)
+            const allowedKeywords = ["restaurant", "ristorante", "fast food", "bar", "cafe", "caffè", "pub", "autogrill", "tavola calda", "trattoria", "osteria", "pizzeria"];
             const isAllowed = allowedKeywords.some(keyword => poiCategory.includes(keyword));
             if (!isAllowed) {
+              console.log("POI non alimentare:", poiCategory);
               return null;
             }
             return {
@@ -146,9 +161,11 @@
     function getIconForCategory(category) {
       const icons = {
         restaurant: 'https://cdn-icons-png.flaticon.com/512/3075/3075977.png',
+        ristorante: 'https://cdn-icons-png.flaticon.com/512/3075/3075977.png',
         fast_food: 'https://cdn-icons-png.flaticon.com/512/3075/3075977.png',
         bar: 'https://cdn-icons-png.flaticon.com/512/1554/1554567.png',
         cafe: 'https://cdn-icons-png.flaticon.com/512/1161/1161388.png',
+        "caffè": 'https://cdn-icons-png.flaticon.com/512/1161/1161388.png',
         pub: 'https://cdn-icons-png.flaticon.com/512/1161/1161388.png',
         autogrill: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
         "tavola calda": 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
@@ -160,11 +177,10 @@
       return icons[category.toLowerCase()] || icons['default'];
     }
 
-    // Aggiunge un marker solo se il click (tasto destro) è vicino a un POI alimentare valido e non esiste già un marker entro 10 metri
+    // Aggiunge un marker (con tasto destro) solo se il click è vicino a un POI alimentare valido e non esiste già un marker entro 10 metri.
     async function addMarkerOnPOI(event) {
       event.preventDefault(); // Impedisce il menu contestuale
       const coords = event.lngLat;
-      // Controlla duplicati (entro 10 metri)
       const duplicate = savedMarkers.some(m => computeDistance(m.lat, m.lon, coords.lat, coords.lng) < 10);
       if (duplicate) {
         alert("Esiste già un marker in questa posizione!");
@@ -187,7 +203,6 @@
           .addTo(map);
         savedMarkers.push({ lat: coords.lat, lon: coords.lng, name: poiName, category });
         localStorage.setItem('markers', JSON.stringify(savedMarkers));
-        // Rimuovi il marker con il tasto destro sul marker stesso
         marker.getElement().style.pointerEvents = 'auto';
         marker.getElement().addEventListener('contextmenu', (e) => {
           e.preventDefault();
@@ -229,6 +244,23 @@
       setTimeout(() => {
         if (map) map.on('contextmenu', addMarkerOnPOI);
       }, 2000);
+    });
+
+    // Gestione del pulsante per il cambio di stile (satellite/streets)
+    document.getElementById('toggle-style').addEventListener('click', () => {
+      if (!map) return;
+      if (currentStyle === 'streets') {
+        map.setStyle(`https://api.maptiler.com/maps/satellite/style.json?key=${API_KEY}`);
+        currentStyle = 'satellite';
+        document.getElementById('toggle-style').textContent = 'Streets';
+      } else {
+        map.setStyle(`https://api.maptiler.com/maps/streets/style.json?key=${API_KEY}`);
+        currentStyle = 'streets';
+        document.getElementById('toggle-style').textContent = 'Satellite';
+      }
+      map.on('style.load', () => {
+        loadSavedMarkers();
+      });
     });
   </script>
 </body>
