@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mappa con POI Alimentari e Modalità Satellite</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mappa Satellite Realistica</title>
   <script src="https://unpkg.com/maplibre-gl/dist/maplibre-gl.js"></script>
   <link href="https://unpkg.com/maplibre-gl/dist/maplibre-gl.css" rel="stylesheet" />
   <style>
@@ -28,9 +28,10 @@
       right: 10px;
       z-index: 1000;
       padding: 5px 10px;
-      background: rgba(255,255,255,0.8);
+      background: rgba(255, 255, 255, 0.9);
       border: none;
       cursor: pointer;
+      font-size: 14px;
     }
   </style>
 </head>
@@ -43,19 +44,19 @@
     let userMarker = null;
     let firstLoad = true;
     let savedMarkers = JSON.parse(localStorage.getItem('markers')) || [];
-    let currentStyle = 'streets'; // stile attuale
+    let currentStyle = 'streets'; // "streets" o "satellite"
 
-    // Formula di Haversine per calcolare la distanza in metri
+    // Funzione per calcolare la distanza (formula di Haversine)
     function computeDistance(lat1, lon1, lat2, lon2) {
       const R = 6371000;
       const φ1 = lat1 * Math.PI / 180;
       const φ2 = lat2 * Math.PI / 180;
       const Δφ = (lat2 - lat1) * Math.PI / 180;
       const Δλ = (lon2 - lon1) * Math.PI / 180;
-      const a = Math.sin(Δφ/2) ** 2 +
+      const a = Math.sin(Δφ / 2) ** 2 +
                 Math.cos(φ1) * Math.cos(φ2) *
-                Math.sin(Δλ/2) ** 2;
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+                Math.sin(Δλ / 2) ** 2;
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
       return R * c;
     }
 
@@ -72,8 +73,10 @@
           bearing: 0,
           antialias: true
         });
+
         map.addControl(new maplibregl.NavigationControl());
-        // Gestione degli sprite mancanti
+
+        // Gestione immagini mancanti (sprite)
         map.on('styleimagemissing', function(e) {
           if (e.id === 'office_11' || e.id === 'atm_11') {
             const canvas = document.createElement('canvas');
@@ -85,13 +88,22 @@
             map.addImage(e.id, canvas);
           }
         });
-        // Marker della posizione utente
+
+        // Marker per la posizione utente
         userMarker = new maplibregl.Marker({ color: 'red' })
           .setLngLat([lon, lat])
           .addTo(map);
+
         map.on('load', () => {
           loadSavedMarkers();
+          // Se siamo in modalità satellite, aggiungiamo il DEM e attiviamo il terreno
+          if (currentStyle === 'satellite') {
+            addTerrain();
+          }
+          // Aggiungiamo una luce per migliorare l'effetto 3D
+          map.setLight({ anchor: 'viewport', color: 'white', intensity: 0.5 });
         });
+
         firstLoad = false;
       }
       navigator.geolocation.watchPosition(updatePosition, onLocationError, { enableHighAccuracy: true });
@@ -118,7 +130,51 @@
       }
     }
 
-    // Restituisce il POI più vicino (entro 50 metri) solo se legato al cibo/ristorazione.
+    function loadSavedMarkers() {
+      savedMarkers.forEach(markerData => {
+        const markerEl = document.createElement('div');
+        markerEl.style.width = "30px";
+        markerEl.style.height = "30px";
+        markerEl.style.backgroundSize = "cover";
+        markerEl.style.backgroundImage = `url(${getIconForCategory(markerData.category)})`;
+        markerEl.style.cursor = "pointer";
+        const marker = new maplibregl.Marker({ element: markerEl })
+          .setLngLat([markerData.lon, markerData.lat])
+          .setPopup(new maplibregl.Popup({ offset: 25 }).setHTML(`<b>${markerData.name}</b>`))
+          .addTo(map);
+        marker.getElement().style.pointerEvents = 'auto';
+        marker.getElement().addEventListener('contextmenu', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          marker.remove();
+          savedMarkers = savedMarkers.filter(m => computeDistance(m.lat, m.lon, markerData.lat, markerData.lon) >= 10);
+          localStorage.setItem('markers', JSON.stringify(savedMarkers));
+        });
+      });
+    }
+
+    // Funzione per aggiungere un source DEM e abilitare il terrain
+    function addTerrain() {
+      if (!map.getSource('maptiler-dem')) {
+        map.addSource('maptiler-dem', {
+          type: 'raster-dem',
+          url: `https://api.maptiler.com/tiles/terrain/{z}/{x}/{y}.png?key=${API_KEY}`,
+          tileSize: 256,
+          maxzoom: 14
+        });
+      }
+      map.setTerrain({ source: 'maptiler-dem', exaggeration: 1.2 });
+    }
+
+    // Funzione per rimuovere il terreno (opzionale, se torni a streets)
+    function removeTerrain() {
+      map.setTerrain(null);
+      if (map.getSource('maptiler-dem')) {
+        map.removeSource('maptiler-dem');
+      }
+    }
+
+    // Funzioni per ottenere POI e icone (rimangono invariate rispetto alla versione precedente)
     async function getNearestPOI(lon, lat) {
       try {
         const response = await fetch(`https://api.maptiler.com/geocoding/${lon},${lat}.json?key=${API_KEY}&types=poi`);
@@ -127,8 +183,7 @@
           const poi = data.features[0];
           const poiCoords = poi.geometry.coordinates;
           const distance = computeDistance(lat, lon, poiCoords[1], poiCoords[0]);
-          if (distance <= 50) {
-            // Otteniamo la categoria dal campo properties.category o dal testo.
+          if (distance <= 50) {  // soglia di 50 metri
             let poiCategory = "";
             if (poi.properties && poi.properties.category) {
               poiCategory = poi.properties.category.toLowerCase();
@@ -136,7 +191,7 @@
             if (!poiCategory && poi.text) {
               poiCategory = poi.text.toLowerCase();
             }
-            // Parole chiave ammesse (in inglese e italiano)
+            // Parole chiave ammesse per il cibo/ristorazione (inglese e italiano)
             const allowedKeywords = ["restaurant", "ristorante", "fast food", "bar", "cafe", "caffè", "pub", "autogrill", "tavola calda", "trattoria", "osteria", "pizzeria"];
             const isAllowed = allowedKeywords.some(keyword => poiCategory.includes(keyword));
             if (!isAllowed) {
@@ -177,9 +232,9 @@
       return icons[category.toLowerCase()] || icons['default'];
     }
 
-    // Aggiunge un marker (con tasto destro) solo se il click è vicino a un POI alimentare valido e non esiste già un marker entro 10 metri.
+    // Aggiunge un marker con tasto destro solo se il click è vicino a un POI alimentare e non esiste già un marker entro 10 metri
     async function addMarkerOnPOI(event) {
-      event.preventDefault(); // Impedisce il menu contestuale
+      event.preventDefault();
       const coords = event.lngLat;
       const duplicate = savedMarkers.some(m => computeDistance(m.lat, m.lon, coords.lat, coords.lng) < 10);
       if (duplicate) {
@@ -216,51 +271,37 @@
       }
     }
 
-    function loadSavedMarkers() {
-      savedMarkers.forEach(markerData => {
-        const markerEl = document.createElement('div');
-        markerEl.style.width = "30px";
-        markerEl.style.height = "30px";
-        markerEl.style.backgroundSize = "cover";
-        markerEl.style.backgroundImage = `url(${getIconForCategory(markerData.category)})`;
-        markerEl.style.cursor = "pointer";
-        const marker = new maplibregl.Marker({ element: markerEl })
-          .setLngLat([markerData.lon, markerData.lat])
-          .setPopup(new maplibregl.Popup({ offset: 25 }).setHTML(`<b>${markerData.name}</b>`))
-          .addTo(map);
-        marker.getElement().style.pointerEvents = 'auto';
-        marker.getElement().addEventListener('contextmenu', (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          marker.remove();
-          savedMarkers = savedMarkers.filter(m => computeDistance(m.lat, m.lon, markerData.lat, markerData.lon) >= 10);
-          localStorage.setItem('markers', JSON.stringify(savedMarkers));
-        });
-      });
-    }
-
     document.addEventListener("DOMContentLoaded", () => {
       startGeolocation();
+      // Usa "contextmenu" per inserire marker con il tasto destro
       setTimeout(() => {
         if (map) map.on('contextmenu', addMarkerOnPOI);
       }, 2000);
     });
 
-    // Gestione del pulsante per il cambio di stile (satellite/streets)
+    // Gestione del pulsante per il cambio di stile
     document.getElementById('toggle-style').addEventListener('click', () => {
       if (!map) return;
       if (currentStyle === 'streets') {
         map.setStyle(`https://api.maptiler.com/maps/satellite/style.json?key=${API_KEY}`);
         currentStyle = 'satellite';
         document.getElementById('toggle-style').textContent = 'Streets';
+        map.once('styledata', () => {
+          // Aggiungiamo il DEM e attiviamo il terreno nella modalità satellite
+          addTerrain();
+          map.setLight({ anchor: 'viewport', color: 'white', intensity: 0.7 });
+          loadSavedMarkers();
+        });
       } else {
         map.setStyle(`https://api.maptiler.com/maps/streets/style.json?key=${API_KEY}`);
         currentStyle = 'streets';
         document.getElementById('toggle-style').textContent = 'Satellite';
+        map.once('styledata', () => {
+          removeTerrain();
+          map.setLight({ anchor: 'viewport', color: 'white', intensity: 0.5 });
+          loadSavedMarkers();
+        });
       }
-      map.on('style.load', () => {
-        loadSavedMarkers();
-      });
     });
   </script>
 </body>
