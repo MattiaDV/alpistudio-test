@@ -316,9 +316,18 @@
   
   
   
-  <div id = "mappa"></div>
-  <script>
-  document.addEventListener("DOMContentLoaded", function () {
+  <div id="mappa" style="height: 500px;"></div>
+
+<!-- Includi Leaflet -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+
+<!-- Includi il Geocoder -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+<script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
     var map = L.map('mappa').setView([45.4642, 9.1900], 13); // Imposta la vista iniziale sulla mappa (Milano)
 
     // Aggiunge un layer OpenStreetMap
