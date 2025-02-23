@@ -322,7 +322,7 @@
   
   
   
-  <div id="mappa" style="height: 500px;"></div>
+ <div id="mappa" style="height: 500px;"></div>
 
 <!-- Includi Leaflet -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
@@ -334,12 +334,14 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-    var map = L.map('mappa').setView([45.4642, 9.1900], 13); // Imposta la vista iniziale sulla mappa (Milano)
+    var map = L.map('mappa').setView([45.4642, 9.1900], 13); // Milano
 
     // Aggiunge un layer OpenStreetMap
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
+
+    var geocoder = L.Control.Geocoder.nominatim();
 
     // Array di indirizzi
     var locations = [
@@ -348,16 +350,21 @@ document.addEventListener("DOMContentLoaded", function () {
         { name: "Ristorante C", address: "Piazza Duomo, Milano" }
     ];
 
-    var geocoder = L.Control.Geocoder.nominatim();
+    function addMarkerWithDelay(location, delay) {
+        setTimeout(() => {
+            geocoder.geocode(location.address, function (results) {
+                if (results.length > 0) {
+                    var latlng = results[0].center;
+                    L.marker(latlng).addTo(map).bindPopup(location.name);
+                } else {
+                    console.warn("Indirizzo non trovato: " + location.address);
+                }
+            });
+        }, delay);
+    }
 
-    locations.forEach(function (location) {
-        geocoder.geocode(location.address, function (results) {
-            if (results.length > 0) {
-                var latlng = results[0].center;
-                L.marker(latlng).addTo(map)
-                    .bindPopup(location.name);
-            }
-        });
+    locations.forEach((location, index) => {
+        addMarkerWithDelay(location, index * 1000); // Ritardo di 1s tra le richieste
     });
 
     // Array di vie per il percorso
@@ -368,18 +375,25 @@ document.addEventListener("DOMContentLoaded", function () {
     ];
 
     var routeCoords = [];
-    var pendingRequests = routeAddresses.length;
 
-    routeAddresses.forEach(function (address, index) {
-        geocoder.geocode(address, function (results) {
-            if (results.length > 0) {
-                routeCoords[index] = results[0].center;
-            }
-            pendingRequests--;
-            if (pendingRequests === 0) {
-                L.polyline(routeCoords, { color: 'blue' }).addTo(map);
-            }
-        });
+    function addRouteWithDelay(address, index) {
+        setTimeout(() => {
+            geocoder.geocode(address, function (results) {
+                if (results.length > 0) {
+                    routeCoords[index] = results[0].center;
+                } else {
+                    console.warn("Indirizzo non trovato: " + address);
+                }
+
+                if (routeCoords.length === routeAddresses.length && !routeCoords.includes(undefined)) {
+                    L.polyline(routeCoords, { color: 'blue' }).addTo(map);
+                }
+            });
+        }, index * 1000);
+    }
+
+    routeAddresses.forEach((address, index) => {
+        addRouteWithDelay(address, index);
     });
 });
 </script>
