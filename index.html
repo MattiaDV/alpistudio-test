@@ -304,5 +304,62 @@
       }
     });
   </script>
+  
+  
+  
+  
+  <div id = "mappa"></div>
+  <script>
+  document.addEventListener("DOMContentLoaded", function () {
+    var map = L.map('mappa').setView([45.4642, 9.1900], 13); // Imposta la vista iniziale sulla mappa (Milano)
+
+    // Aggiunge un layer OpenStreetMap
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Array di indirizzi
+    var locations = [
+        { name: "Ristorante A", address: "Via Torino, Milano" },
+        { name: "Ristorante B", address: "Corso Buenos Aires, Milano" },
+        { name: "Ristorante C", address: "Piazza Duomo, Milano" }
+    ];
+
+    var geocoder = L.Control.Geocoder.nominatim();
+
+    locations.forEach(function (location) {
+        geocoder.geocode(location.address, function (results) {
+            if (results.length > 0) {
+                var latlng = results[0].center;
+                L.marker(latlng).addTo(map)
+                    .bindPopup(location.name);
+            }
+        });
+    });
+
+    // Array di vie per il percorso
+    var routeAddresses = [
+        "Via Torino, Milano",
+        "Corso Buenos Aires, Milano",
+        "Piazza Duomo, Milano"
+    ];
+
+    var routeCoords = [];
+    var pendingRequests = routeAddresses.length;
+
+    routeAddresses.forEach(function (address, index) {
+        geocoder.geocode(address, function (results) {
+            if (results.length > 0) {
+                routeCoords[index] = results[0].center;
+            }
+            pendingRequests--;
+            if (pendingRequests === 0) {
+                L.polyline(routeCoords, { color: 'blue' }).addTo(map);
+            }
+        });
+    });
+});
+</script>
+
 </body>
 </html>
