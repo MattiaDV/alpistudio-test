@@ -25,7 +25,6 @@
 </head>
 <body>
   <div id="map"></div>
-
   <script>
     const API_KEY = 'e9pLQRlbmlvafLyJ6L8B'; // Sostituisci con la tua API Key di MapTiler
     let map;
@@ -33,16 +32,16 @@
     let firstLoad = true;
     let savedMarkers = JSON.parse(localStorage.getItem('markers')) || [];
 
-    // Funzione per calcolare la distanza in metri tra due coordinate (formula di Haversine)
+    // Calcola la distanza in metri tra due coordinate usando la formula di Haversine
     function computeDistance(lat1, lon1, lat2, lon2) {
       const R = 6371000; // raggio della Terra in metri
       const φ1 = lat1 * Math.PI / 180;
       const φ2 = lat2 * Math.PI / 180;
       const Δφ = (lat2 - lat1) * Math.PI / 180;
       const Δλ = (lon2 - lon1) * Math.PI / 180;
-      const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+      const a = Math.sin(Δφ / 2) ** 2 +
                 Math.cos(φ1) * Math.cos(φ2) *
-                Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+                Math.sin(Δλ / 2) ** 2;
       const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
       return R * c;
     }
@@ -64,7 +63,7 @@
 
         map.addControl(new maplibregl.NavigationControl());
 
-        // Per gestire immagini mancanti (fallback per "office_11" e "atm_11")
+        // Gestione delle immagini mancanti per alcuni sprite
         map.on('styleimagemissing', function(e) {
           if (e.id === 'office_11' || e.id === 'atm_11') {
             const canvas = document.createElement('canvas');
@@ -113,7 +112,7 @@
       }
     }
 
-    // Restituisce il POI più vicino se è entro 50 metri, altrimenti null
+    // Restituisce il POI più vicino se entro 50 metri, altrimenti null
     async function getNearestPOI(lon, lat) {
       try {
         const response = await fetch(`https://api.maptiler.com/geocoding/${lon},${lat}.json?key=${API_KEY}&types=poi`);
@@ -122,7 +121,7 @@
           const poi = data.features[0];
           const poiCoords = poi.geometry.coordinates; // [lon, lat]
           const distance = computeDistance(lat, lon, poiCoords[1], poiCoords[0]);
-          if (distance <= 50) {  // soglia di 50 metri
+          if (distance <= 50) { // soglia di 50 metri
             return {
               name: poi.text || "POI sconosciuto",
               category: poi.properties?.category || "default",
@@ -148,11 +147,10 @@
       return icons[category] || icons['default'];
     }
 
-    // Aggiunge un marker solo se il click è vicino a un POI e non esiste già un marker in quella zona (entro 10 metri)
+    // Aggiunge un marker solo se il click è vicino a un POI e non esiste già un marker entro 10 metri
     async function addMarkerOnPOI(event) {
       const coords = event.lngLat;
       
-      // Controlla se c'è già un marker salvato vicino (entro 10 metri)
       const duplicate = savedMarkers.some(m => computeDistance(m.lat, m.lon, coords.lat, coords.lng) < 10);
       if (duplicate) {
         alert("Esiste già un marker in questa posizione!");
@@ -180,8 +178,10 @@
         savedMarkers.push({ lat: coords.lat, lon: coords.lng, name: poiName, category });
         localStorage.setItem('markers', JSON.stringify(savedMarkers));
 
-        markerEl.addEventListener('dblclick', (e) => {
-          e.stopPropagation(); // impedisce che il doppio click attivi anche il click della mappa
+        // Utilizza marker.getElement() per intercettare il doppio click
+        marker.getElement().style.pointerEvents = 'auto';
+        marker.getElement().addEventListener('dblclick', (e) => {
+          e.stopPropagation();
           marker.remove();
           savedMarkers = savedMarkers.filter(m => computeDistance(m.lat, m.lon, coords.lat, coords.lng) >= 10);
           localStorage.setItem('markers', JSON.stringify(savedMarkers));
@@ -205,7 +205,8 @@
           .setPopup(new maplibregl.Popup({ offset: 25 }).setHTML(`<b>${markerData.name}</b>`))
           .addTo(map);
 
-        markerEl.addEventListener('dblclick', (e) => {
+        marker.getElement().style.pointerEvents = 'auto';
+        marker.getElement().addEventListener('dblclick', (e) => {
           e.stopPropagation();
           marker.remove();
           savedMarkers = savedMarkers.filter(m => computeDistance(m.lat, m.lon, markerData.lat, markerData.lon) >= 10);
@@ -216,7 +217,6 @@
 
     document.addEventListener("DOMContentLoaded", () => {
       startGeolocation();
-      // Assicuriamoci che la mappa sia pronta e poi aggiungiamo il listener per il click
       setTimeout(() => {
         if (map) map.on('click', addMarkerOnPOI);
       }, 2000);
