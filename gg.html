@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mappa con Marker e Percorso</title>
+
+    <!-- Includi Leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+
+    <!-- Includi il Geocoder -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+
+    <style>
+        #mappa {
+            width: 100%;
+            height: 500px;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Mappa dei Ristoranti</h2>
+    <div id="mappa"></div>
+
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var map = L.map('mappa').setView([45.4642, 9.1900], 13); // Milano
+
+        // Aggiunge un layer OpenStreetMap
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        var geocoder = L.Control.Geocoder.nominatim();
+
+        // Array di indirizzi
+        var locations = [
+            { name: "Ristorante A", address: "Via Torino, Milano" },
+            { name: "Ristorante B", address: "Corso Buenos Aires, Milano" },
+            { name: "Ristorante C", address: "Piazza Duomo, Milano" }
+        ];
+
+        function addMarkerWithDelay(location, delay) {
+            setTimeout(() => {
+                geocoder.geocode(location.address, function (results) {
+                    if (results.length > 0) {
+                        var latlng = results[0].center;
+                        L.marker(latlng).addTo(map).bindPopup(location.name);
+                    } else {
+                        console.warn("Indirizzo non trovato: " + location.address);
+                    }
+                });
+            }, delay);
+        }
+
+        locations.forEach((location, index) => {
+            addMarkerWithDelay(location, index * 1000); // Ritardo di 1s tra le richieste
+        });
+
+        // Array di vie per il percorso
+        var routeAddresses = [
+            "Via Torino, Milano",
+            "Corso Buenos Aires, Milano",
+            "Piazza Duomo, Milano"
+        ];
+
+        var routeCoords = [];
+
+        function addRouteWithDelay(address, index) {
+            setTimeout(() => {
+                geocoder.geocode(address, function (results) {
+                    if (results.length > 0) {
+                        routeCoords[index] = results[0].center;
+                    } else {
+                        console.warn("Indirizzo non trovato: " + address);
+                    }
+
+                    if (routeCoords.length === routeAddresses.length && !routeCoords.includes(undefined)) {
+                        L.polyline(routeCoords, { color: 'blue' }).addTo(map);
+                    }
+                });
+            }, index * 1000);
+        }
+
+        routeAddresses.forEach((address, index) => {
+            addRouteWithDelay(address, index);
+        });
+    });
+    </script>
+
+</body>
+</html>
