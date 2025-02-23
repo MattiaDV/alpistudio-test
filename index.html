@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mappa con POI Personalizzati</title>
+  <title>Mappa con POI Alimentari</title>
   <script src="https://unpkg.com/maplibre-gl/dist/maplibre-gl.js"></script>
   <link href="https://unpkg.com/maplibre-gl/dist/maplibre-gl.css" rel="stylesheet" />
   <style>
@@ -32,7 +32,7 @@
     let firstLoad = true;
     let savedMarkers = JSON.parse(localStorage.getItem('markers')) || [];
 
-    // Calcola la distanza in metri tra due coordinate usando la formula di Haversine
+    // Formula di Haversine per calcolare la distanza in metri
     function computeDistance(lat1, lon1, lat2, lon2) {
       const R = 6371000; // raggio della Terra in metri
       const φ1 = lat1 * Math.PI / 180;
@@ -76,7 +76,7 @@
           }
         });
 
-        // Marker della posizione utente
+        // Marker per la posizione utente
         userMarker = new maplibregl.Marker({ color: 'red' })
           .setLngLat([lon, lat])
           .addTo(map);
@@ -112,7 +112,7 @@
       }
     }
 
-    // Restituisce il POI più vicino se entro 50 metri, altrimenti null
+    // Funzione che restituisce il POI più vicino (entro 50 metri) solo se rientra nelle categorie consentite
     async function getNearestPOI(lon, lat) {
       try {
         const response = await fetch(`https://api.maptiler.com/geocoding/${lon},${lat}.json?key=${API_KEY}&types=poi`);
@@ -121,7 +121,13 @@
           const poi = data.features[0];
           const poiCoords = poi.geometry.coordinates; // [lon, lat]
           const distance = computeDistance(lat, lon, poiCoords[1], poiCoords[0]);
-          if (distance <= 50) { // soglia di 50 metri
+          if (distance <= 50) {  // soglia di 50 metri
+            // Lista di categorie consentite (tutte in minuscolo)
+            const allowedCategories = ["restaurant", "fast_food", "bar", "cafe", "pub", "autogrill", "tavola calda", "trattoria", "osteria", "pizzeria"];
+            const poiCategory = (poi.properties?.category || "").toLowerCase();
+            if (!allowedCategories.includes(poiCategory)) {
+              return null;
+            }
             return {
               name: poi.text || "POI sconosciuto",
               category: poi.properties?.category || "default",
@@ -140,17 +146,26 @@
     function getIconForCategory(category) {
       const icons = {
         restaurant: 'https://cdn-icons-png.flaticon.com/512/3075/3075977.png',
-        bank: 'https://cdn-icons-png.flaticon.com/512/1554/1554567.png',
-        shop: 'https://cdn-icons-png.flaticon.com/512/1161/1161388.png',
+        fast_food: 'https://cdn-icons-png.flaticon.com/512/3075/3075977.png',
+        bar: 'https://cdn-icons-png.flaticon.com/512/1554/1554567.png',
+        cafe: 'https://cdn-icons-png.flaticon.com/512/1161/1161388.png',
+        pub: 'https://cdn-icons-png.flaticon.com/512/1161/1161388.png',
+        autogrill: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
+        "tavola calda": 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
+        trattoria: 'https://cdn-icons-png.flaticon.com/512/3075/3075977.png',
+        osteria: 'https://cdn-icons-png.flaticon.com/512/3075/3075977.png',
+        pizzeria: 'https://cdn-icons-png.flaticon.com/512/3075/3075977.png',
         default: 'https://cdn-icons-png.flaticon.com/512/684/684908.png'
       };
-      return icons[category] || icons['default'];
+      return icons[category.toLowerCase()] || icons['default'];
     }
 
-    // Aggiunge un marker solo se il click è vicino a un POI e non esiste già un marker entro 10 metri
+    // Aggiunge un marker solo se il click (tasto destro) è vicino a un POI valido e non esiste già un marker entro 10 metri
     async function addMarkerOnPOI(event) {
+      event.preventDefault(); // Impedisce il menu contestuale
       const coords = event.lngLat;
       
+      // Verifica duplicati (entro 10 metri)
       const duplicate = savedMarkers.some(m => computeDistance(m.lat, m.lon, coords.lat, coords.lng) < 10);
       if (duplicate) {
         alert("Esiste già un marker in questa posizione!");
@@ -162,32 +177,33 @@
         const poiName = poi.name;
         const category = poi.category;
         const iconUrl = getIconForCategory(category);
-
+        
         const markerEl = document.createElement('div');
         markerEl.style.width = "30px";
         markerEl.style.height = "30px";
         markerEl.style.backgroundSize = "cover";
         markerEl.style.backgroundImage = `url(${iconUrl})`;
         markerEl.style.cursor = "pointer";
-
+        
         const marker = new maplibregl.Marker({ element: markerEl })
           .setLngLat([coords.lng, coords.lat])
           .setPopup(new maplibregl.Popup({ offset: 25 }).setHTML(`<b>${poiName}</b>`))
           .addTo(map);
-
+        
         savedMarkers.push({ lat: coords.lat, lon: coords.lng, name: poiName, category });
         localStorage.setItem('markers', JSON.stringify(savedMarkers));
-
-        // Utilizza marker.getElement() per intercettare il doppio click
+        
+        // Usa il tasto destro sul marker per rimuoverlo
         marker.getElement().style.pointerEvents = 'auto';
-        marker.getElement().addEventListener('dblclick', (e) => {
+        marker.getElement().addEventListener('contextmenu', (e) => {
+          e.preventDefault();
           e.stopPropagation();
           marker.remove();
           savedMarkers = savedMarkers.filter(m => computeDistance(m.lat, m.lon, coords.lat, coords.lng) >= 10);
           localStorage.setItem('markers', JSON.stringify(savedMarkers));
         });
       } else {
-        alert("Nessun POI valido trovato qui. Clicca più vicino a un punto d'interesse!");
+        alert("Nessun POI valido legato al cibo trovato qui. Clicca più vicino a un punto d'interesse alimentare!");
       }
     }
 
@@ -199,14 +215,15 @@
         markerEl.style.backgroundSize = "cover";
         markerEl.style.backgroundImage = `url(${getIconForCategory(markerData.category)})`;
         markerEl.style.cursor = "pointer";
-
+        
         const marker = new maplibregl.Marker({ element: markerEl })
           .setLngLat([markerData.lon, markerData.lat])
           .setPopup(new maplibregl.Popup({ offset: 25 }).setHTML(`<b>${markerData.name}</b>`))
           .addTo(map);
-
+        
         marker.getElement().style.pointerEvents = 'auto';
-        marker.getElement().addEventListener('dblclick', (e) => {
+        marker.getElement().addEventListener('contextmenu', (e) => {
+          e.preventDefault();
           e.stopPropagation();
           marker.remove();
           savedMarkers = savedMarkers.filter(m => computeDistance(m.lat, m.lon, markerData.lat, markerData.lon) >= 10);
@@ -214,11 +231,12 @@
         });
       });
     }
-
+    
     document.addEventListener("DOMContentLoaded", () => {
       startGeolocation();
+      // Aggiungi il listener per il tasto destro (contextmenu) per inserire marker
       setTimeout(() => {
-        if (map) map.on('click', addMarkerOnPOI);
+        if (map) map.on('contextmenu', addMarkerOnPOI);
       }, 2000);
     });
   </script>
