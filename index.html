@@ -21,14 +21,22 @@
       flex-direction: column;
     }
     .elencoContainer {
-        width: 100%;
+        height: 100vh;
         position: fixed;
         left: 0;
         bottom: 0;
+        width: 30%;
         display: flex;
-        justify-content: center;
+        background: #aa182c;
+        justify-content: flex-start;
         align-items: center;
-        color: black;
+        flex-direction: column;
+        color: white;
+        overflow: scroll;
+        overflow-x: hidden;
+        border-top-left-radius: 20px;
+        border-top-right-radius: 20px;
+        box-shadow: 0px 4px 16px rgb(0, 0, 0)
     }
 
     .container {
@@ -36,6 +44,7 @@
         justify-content: center;
         align-items: center;
         gap: 0px;
+        height: 100%;
         width: 100%;
         padding: 15px;
         font-family: sans-serif;
@@ -43,8 +52,59 @@
         font-weight: 600;
         border-top-left-radius: 20px;
         border-top-right-radius: 20px;
-        background: #aa182c;
         color: white;
+    }
+
+    .elencoStatico div img {
+      max-width: 100%;
+    }
+
+    .elencoStatico {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 20px;
+      padding-top: 20px;
+      max-width: 100%;
+    }
+
+    .elencoStatico div {
+      background: white;
+      color: #aa182c;
+      padding: 20px;
+      border-radius: 26px;
+      margin: 5px;
+    }
+
+    @media screen and (max-width: 1200px) {
+      .elencoContainer {
+          width: 100%;
+          position: fixed;
+          left: 0;
+          bottom: 0;
+          height: 60px;
+          display: flex;
+          justify-content: flex-start;
+          align-items: center;
+          color: black;
+      }
+
+      .container {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          gap: 0px;
+          width: 100%;
+          padding: 15px;
+          font-family: sans-serif;
+          font-size: 16px;
+          font-weight: 600;
+          border-top-left-radius: 20px;
+          border-top-right-radius: 20px;
+          background: #aa182c;
+          color: white;
+      }
     }
   </style>
 </head>
@@ -54,12 +114,60 @@
             <div class = "logo"><svg width = "30px" height = "30px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g id="System / Data"> <path id="Vector" d="M18 12V17C18 18.6569 15.3137 20 12 20C8.68629 20 6 18.6569 6 17V12M18 12V7M18 12C18 13.6569 15.3137 15 12 15C8.68629 15 6 13.6569 6 12M18 7C18 5.34315 15.3137 4 12 4C8.68629 4 6 5.34315 6 7M18 7C18 8.65685 15.3137 10 12 10C8.68629 10 6 8.65685 6 7M6 12V7" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g> </g></svg></div>
             <div class = "text">Elenco</div>
         </div>
+        <div class = "elencoStatico" id = "elencoCard">
+
+        </div>
     </div>
   <script>
+    let ristoranti = [
+      {
+        nome: "Ristornate 1",
+        descrizione: "Il ristorante numero 1 in Italia, bellissimo, non sono mai stato in un posto così bello",
+        valutazione: 4,
+        foto: 'img/risto.jpg'
+      },
+      {
+        nome: "Ristornate 2",
+        descrizione: "Il ristorante numero 1 in Italia, bellissimo, non sono mai stato in un posto così bello",
+        valutazione: 2,
+        foto: 'img/risto.jpg'
+      },
+      {
+        nome: "Ristornate 3",
+        descrizione: "Il ristorante numero 1 in Italia, bellissimo, non sono mai stato in un posto così bello",
+        valutazione: 5,
+        foto: 'img/risto.jpg'
+      }
+    ];
+
+    let containerElenco = document.querySelector('#elencoCard');
+
+    for (let risto of ristoranti) {
+      let html = `
+        <div class="card" style="width: 18rem;">
+          <img src="${risto.foto}" class="card-img-top" alt="${risto.nome}">
+          <div class="card-body">
+            <h5 class="card-title">${risto.nome}</h5>
+            <p class="card-text">${risto.descrizione}</p>
+            <p class="card-text">Valutazione: ${'⭐'.repeat(risto.valutazione)}</p>
+          </div>
+        </div>
+      `;
+
+      containerElenco.innerHTML += html;
+    }
+
+
     let newPage = document.getElementById('newPage');
-    newPage.addEventListener('click', function() {
-        window.location.href = "https://www.google.it/maps/place/40%C2%B019'38.5%22N+9%C2%B020'03.5%22E/@40.327353,9.3317351,17z/data=!3m1!4b1!4m4!3m3!8m2!3d40.327353!4d9.33431?entry=ttu&g_ep=EgoyMDI1MDIyNC4wIKXMDSoASAFQAw%3D%3D";
-    })
+    let x = -1;
+
+    if (window.innerWidth < 1200) {
+      newPage.addEventListener('click', function() {
+        x *= -1;
+        newPage.style.height = x === -1 ? "60px" : "400px";
+      });
+    }
+
   </script>
   
   
