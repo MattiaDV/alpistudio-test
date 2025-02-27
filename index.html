@@ -48,15 +48,10 @@
       font-size: 14px;
     }
     .elencoContainer {
-        max-width: 94vw;
-        min-width: 94vw;
+        width: 100%;
         position: fixed;
         left: 0;
         bottom: 0;
-        padding: 15px;
-        border-top-left-radius: 20px;
-        border-top-right-radius: 20px;
-        background: #c1c1c1;
         display: flex;
         justify-content: center;
         align-items: center;
@@ -67,9 +62,16 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        gap: 10px;
+        gap: 0px;
+        width: 100%;
+        padding: 15px;
         font-family: sans-serif;
-        font-size: 14px;
+        font-size: 16px;
+        font-weight: 600;
+        border-top-left-radius: 20px;
+        border-top-right-radius: 20px;
+        background: #aa182c;
+        color: white;
     }
 
     #map {
@@ -82,15 +84,15 @@
   </style>
 </head>
 <body>
-  <div id="map"></div>
-  <button id="toggle-style">Satellite</button>
+  <!-- <div id="map"></div> -->
+  <!-- <button id="toggle-style">Satellite</button> -->
     <div class = "elencoContainer" id = "newPage">
         <div class = "container">
-            <div class = "logo"><svg width = "30px" height = "30px" viewBox="0 0 1024 1024" fill="#000000" class="icon" version="1.1" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M512 0C250.733601 0 46.039591 111.952387 46.039591 254.906974v514.053564c0 142.954587 204.69401 254.906974 465.960409 254.906974s465.960409-111.952387 465.960409-254.906974v-514.053564C977.827921 111.952387 773.266399 0 512 0zM125.53241 508.224091c0-20.535645 9.009186-41.07129 26.762583-61.209471 5.696985-6.359426 8.74421-14.176219 9.671626-21.993013 84.792341 52.465261 209.066115 85.057317 350.033381 85.057317 139.642386 0 263.121232-32.062104 347.781084-83.599949 1.589856 6.491914 4.504593 12.586363 9.274162 17.885885 19.475741 21.065597 29.279855 42.528658 29.279856 63.991719 0 82.937508-158.720662 175.414154-386.46759 175.414155S125.53241 591.161599 125.53241 508.224091zM512 79.492819c227.746927 0 386.46759 92.476646 386.46759 175.414155S739.746927 430.453616 512 430.453616 125.53241 337.97697 125.53241 254.906974 284.253073 79.492819 512 79.492819z m0 865.014362C284.253073 944.507181 125.53241 852.030534 125.53241 768.960538c0-20.535645 9.009186-41.07129 26.762583-61.209471 7.41933-8.479234 10.599043-19.210765 9.804114-29.544831 84.792341 52.332773 209.066115 84.924829 349.900893 84.924829 139.112434 0 262.061327-31.797128 346.72118-82.937508 0.529952 8.876698 3.842153 17.753396 10.334066 24.775262 19.475741 21.065597 29.279855 42.528658 29.279856 63.991719 0 83.069996-158.588174 175.546643-386.335102 175.546643z"></path></g></svg></div>
+            <div class = "logo"><svg width = "30px" height = "30px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g id="System / Data"> <path id="Vector" d="M18 12V17C18 18.6569 15.3137 20 12 20C8.68629 20 6 18.6569 6 17V12M18 12V7M18 12C18 13.6569 15.3137 15 12 15C8.68629 15 6 13.6569 6 12M18 7C18 5.34315 15.3137 4 12 4C8.68629 4 6 5.34315 6 7M18 7C18 8.65685 15.3137 10 12 10C8.68629 10 6 8.65685 6 7M6 12V7" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g> </g></svg></div>
             <div class = "text">Elenco</div>
         </div>
     </div>
-  <script>
+  <!-- <script>
     const API_KEY = 'e9pLQRlbmlvafLyJ6L8B'; // Sostituisci con la tua API Key di MapTiler
     let map;
     let userMarker = null;
@@ -360,7 +362,7 @@
     newPage.addEventListener('click', function() {
         window.location.href = "https://www.google.it/maps/place/40%C2%B019'38.5%22N+9%C2%B020'03.5%22E/@40.327353,9.3317351,17z/data=!3m1!4b1!4m4!3m3!8m2!3d40.327353!4d9.33431?entry=ttu&g_ep=EgoyMDI1MDIyNC4wIKXMDSoASAFQAw%3D%3D";
     })
-  </script>
+  </script> -->
   
   
  <iframe width="100%" height="100%" frameborder="0" allowfullscreen allow="geolocation" 
