@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Mappa Satellite Realistica</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+    .elencoContainer {
+        height: 100vh;
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        width: 30%;
+        display: flex;
+        background: #aa182c;
+        justify-content: flex-start;
+        align-items: center;
+        flex-direction: column;
+        color: white;
+        overflow: scroll;
+        overflow-x: hidden;
+        box-shadow: 0px 4px 16px rgb(0, 0, 0)
+    }
+
+    .container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 0px;
+        height: 100%;
+        width: 100%;
+        padding: 15px;
+        font-family: sans-serif;
+        font-size: 16px;
+        font-weight: 600;
+        color: white;
+    }
+
+    .elencoStatico div img {
+      max-width: 100%;
+    }
+
+    .elencoStatico {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 20px;
+      padding-top: 20px;
+    }
+
+    .elencoStatico div {
+      background: white;
+      color: #aa182c;
+      padding: 20px;
+      border-radius: 26px;
+      margin: 5px;
+      max-width: 80%;
+      margin: 0 auto;
+    }
+
+    @media screen and (max-width: 1200px) {
+      .elencoContainer {
+          width: 100%;
+          position: fixed;
+          left: 0;
+          bottom: 0;
+          height: 60px;
+          display: flex;
+          justify-content: flex-start;
+          align-items: center;
+          color: black;
+          border-top-left-radius: 20px;
+          border-top-right-radius: 20px;
+      }
+
+      .container {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          gap: 0px;
+          width: 100%;
+          padding: 15px;
+          font-family: sans-serif;
+          font-size: 16px;
+          font-weight: 600;
+          border-top-left-radius: 20px;
+          border-top-right-radius: 20px;
+          background: #aa182c;
+          border-top-left-radius: 20px;
+          border-top-right-radius: 20px;
+          color: white;
+      }
+    }
+  </style>
+</head>
+<body>
+    <div class = "elencoContainer" id = "newPage">
+        <div class = "container">
+            <div class = "logo"><svg width = "30px" height = "30px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g id="System / Data"> <path id="Vector" d="M18 12V17C18 18.6569 15.3137 20 12 20C8.68629 20 6 18.6569 6 17V12M18 12V7M18 12C18 13.6569 15.3137 15 12 15C8.68629 15 6 13.6569 6 12M18 7C18 5.34315 15.3137 4 12 4C8.68629 4 6 5.34315 6 7M18 7C18 8.65685 15.3137 10 12 10C8.68629 10 6 8.65685 6 7M6 12V7" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g> </g></svg></div>
+            <div class = "text" id = "button_elenco">Elenco</div>
+        </div>
+        <div class = "elencoStatico" id = "elencoCard">
+
+        </div>
+    </div>
+    <iframe id = "realMap" width="100%" height="100%" frameborder="0" allowfullscreen allow="geolocation" src="//umap.openstreetmap.fr/it/map/mappa_1181759?scaleControl=true&miniMap=false&scrollWheelZoom=true&zoomControl=true&editMode=disabled&moreControl=false&searchControl=false&tilelayersControl=false&embedControl=false&datalayersControl=false&onLoadPanel=none&captionBar=false&captionMenus=false&darkMode=true"></iframe>
+    <script>
+      let ristoranti = [
+          {
+              nome: "Ristornate 1",
+              descrizione: "Il ristorante numero 1 in Italia, bellissimo, non sono mai stato in un posto così bello",
+              valutazione: 4,
+              foto: 'img/risto.jpg'
+          },
+          {
+              nome: "Ristornate 2",
+              descrizione: "Il ristorante numero 1 in Italia, bellissimo, non sono mai stato in un posto così bello",
+              valutazione: 2,
+              foto: 'img/risto.jpg'
+          }
+      ];
+  
+      let containerElenco = document.querySelector('#elencoCard');
+  
+      let index = 0;
+      for (let risto of ristoranti) {
+          let html = `
+              <div class="card" style="width: 18rem;" data-ristorante="${risto.nome}">
+                  <a id="ristorante${index}">
+                  <img src="${risto.foto}" class="card-img-top" alt="${risto.nome}">
+                  <div class="card-body">
+                      <h5 class="card-title">${risto.nome}</h5>
+                      <p class="card-text">${risto.descrizione}</p>
+                      <p class="card-text">Valutazione: ${'⭐'.repeat(risto.valutazione)}</p>
+                  </div>
+              </div>
+          `;
+          index++;
+  
+          containerElenco.innerHTML += html;
+      }
+  
+      let newPage = document.getElementById('newPage');
+      let elencoButton = document.getElementById('button_elenco');
+      let x = -1;
+  
+      if (window.innerWidth < 1200) {
+          elencoButton.addEventListener('click', function() {
+              x *= -1;
+              newPage.style.height = x === -1 ? "60px" : "400px";
+          });
+      }
+  </script>
+
+</body>
+</html>
