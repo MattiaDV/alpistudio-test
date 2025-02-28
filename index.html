@@ -55,6 +55,8 @@
 
     .elencoStatico div img {
       max-width: 100%;
+      border-top-left-radius: 26px;
+      border-top-right-radius: 26px;
     }
 
     .elencoStatico {
@@ -63,16 +65,20 @@
       align-items: flex-start;
       flex-direction: column;
       gap: 20px;
+      padding-bottom: 40px;
       padding-top: 20px;
+    }
+
+    .card-body {
+      padding: 20px;
     }
 
     .elencoStatico div {
       background: white;
       color: #aa182c;
-      padding: 20px;
       border-radius: 26px;
       margin: 5px;
-      max-width: 80%;
+      max-width: 100%;
       margin: 0 auto;
       cursor: pointer;
     }
@@ -218,7 +224,7 @@
 
     function toggleMenu() {
         x *= -1;
-        newPage.style.height = x === -1 ? "60px" : "400px";
+        newPage.style.height = x === -1 ? "60px" : "80vh";
 
         if (x == -1) {
             newPage.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
