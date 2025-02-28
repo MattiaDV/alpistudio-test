@@ -136,9 +136,9 @@
     }).addTo(map);
 
     let ristoranti = [
-      { nome: "Ristorante 1", descrizione: "Descrizione del Ristorante 1", foto: "img/risto.jpg", lat: 39.2238, lon: 9.1217 },
-      { nome: "Ristorante 2", descrizione: "Descrizione del Ristorante 2", foto: "img/risto.jpg", lat: 40.1200, lon: 8.5036 },
-      { nome: "Ristorante 3", descrizione: "Descrizione del Ristorante 3", foto: "img/risto.jpg", lat: 41.1200, lon: 8.5036 }
+      { nome: "Ristorante 1", descrizione: "Descrizione del Ristorante 1, kasdghj, asd,asd asd,asdasdasdasd asdasd asdasd", foto: "img/risto.jpg", valutazione: 3, lat: 39.2238, lon: 9.1217 },
+      { nome: "Ristorante 2", descrizione: "Descrizione del Ristorante 2, asdasdasdasd asd as d asd a sd as dsad  sd adss", foto: "img/risto.jpg", valutazione: 2, lat: 40.1200, lon: 8.5036 },
+      { nome: "Ristorante 3", descrizione: "Descrizione del Ristorante 3, hagsdkjh kjhasg dkjhasg dkjh jhasdkjhg kjgkgsdg", foto: "img/risto.jpg", valutazione: 5, lat: 41.1200, lon: 8.5036 }
     ];
 
     var redIcon = L.icon({
@@ -166,6 +166,7 @@
           <div class="card-body">
             <h5 class="card-title">${risto.nome}</h5>
             <p class="card-text">${risto.descrizione}</p>
+            <p class="card-text">Valutazione: ${'⭐'.repeat(risto.valutazione)}</p>
           </div>
         </div>
       `;
@@ -209,9 +210,11 @@
 
     // Controllo per il pannello dell'elenco
     let x = -1;
-    elencoButton.addEventListener('click', function() {
-      toggleMenu();
-    });
+    if (window.innerWidth < 1200) {
+      elencoButton.addEventListener('click', function() {
+        toggleMenu();
+      });
+    }
 
     function toggleMenu() {
         x *= -1;
