@@ -21,6 +21,10 @@
       align-items: center;
       flex-direction: column;
     }
+    :root {
+      --red-palette: #aa182c;
+      --white-palette: #f9f6f6;
+    }
     .elencoContainer {
       height: 100vh;
       position: fixed;
@@ -29,11 +33,11 @@
       width: 30%;
       display: flex;
       z-index: 10000;
-      background: #aa182c;
+      background: var(--red-palette);
       justify-content: flex-start;
       align-items: center;
       flex-direction: column;
-      color: white;
+      color: var(--white-palette);
       overflow: scroll;
       overflow-x: hidden;
       box-shadow: 0px 4px 16px rgb(0, 0, 0)
@@ -50,7 +54,7 @@
       font-family: sans-serif;
       font-size: 16px;
       font-weight: 600;
-      color: white;
+      color: var(--white-palette);
     }
 
     .elencoStatico div img {
@@ -74,8 +78,8 @@
     }
 
     .elencoStatico div {
-      background: white;
-      color: #aa182c;
+      background: var(--white-palette);
+      color: var(--red-palette);
       border-radius: 26px;
       margin: 5px;
       max-width: 100%;
@@ -110,10 +114,10 @@
           font-weight: 600;
           border-top-left-radius: 20px;
           border-top-right-radius: 20px;
-          background: #aa182c;
+          background: var(--red-palette);
           border-top-left-radius: 20px;
           border-top-right-radius: 20px;
-          color: white;
+          color: var(--white-palette);
       }
     }
   </style>
@@ -133,7 +137,7 @@
   <div id="map" style="height: 100vh; width: 100%;"></div>
 
   <script>
-    var map = L.map('map').setView([40.8517, 12.2681], 5);
+    var map = L.map('map').setView([40.8517, 12.2681], 5.5);
     let newPage = document.getElementById('newPage');
     let elencoButton = document.getElementById('button_elenco');
 
@@ -149,7 +153,7 @@
 
     var redIcon = L.icon({
         iconUrl: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-            <svg height="200px" width="200px" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512" xml:space="preserve" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <circle style="fill:#F4B2B0;" cx="255.996" cy="193.345" r="96.759"></circle> <g> <path style="fill:#aa182c;" d="M256,304.456c-61.264,0-111.107-49.842-111.107-111.105S194.735,82.244,256,82.244 s111.107,49.842,111.107,111.107C367.107,254.615,317.265,304.456,256,304.456z M256,110.943 c-45.439,0-82.408,36.967-82.408,82.408c0,45.439,36.969,82.406,82.408,82.406s82.408-36.967,82.408-82.406 C338.408,147.91,301.439,110.943,256,110.943z"></path> <path style="fill:#aa182c;" d="M256,0C149.386,0,62.649,86.737,62.649,193.351c0,72.07,39.642,135.049,98.262,168.299 l82.662,143.175c2.563,4.44,7.301,7.175,12.427,7.175c5.126,0,9.864-2.735,12.427-7.175l84.026-145.537 c3.963-6.863,1.611-15.639-5.252-19.601c-6.866-3.963-15.639-1.611-19.601,5.252l-71.598,124.013l-51.518-89.231 c16.409,4.542,33.683,6.98,51.518,6.98c7.924,0,14.349-6.424,14.349-14.349c0-7.925-6.426-14.35-14.349-14.35 c-90.791,0-164.652-73.863-164.652-164.652S165.211,28.699,256,28.699s164.652,73.863,164.652,164.652 c0,40.902-15.099,80.118-42.515,110.421c-5.316,5.878-4.863,14.951,1.014,20.269c5.876,5.316,14.951,4.862,20.269-1.014 c32.197-35.591,49.93-81.644,49.93-129.675C449.351,86.737,362.614,0,256,0z"></path> </g> </g></svg>
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M12 21C15.5 17.4 19 14.1764 19 10.2C19 6.22355 15.866 3 12 3C8.13401 3 5 6.22355 5 10.2C5 14.1764 8.5 17.4 12 21Z" stroke="#aa182c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M12 12C13.1046 12 14 11.1046 14 10C14 8.89543 13.1046 8 12 8C10.8954 8 10 8.89543 10 10C10 11.1046 10.8954 12 12 12Z" stroke="#aa182c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
         `),
         iconSize: [40, 60],  // Dimensioni della goccia (più alta)
         iconAnchor: [20, 50],  // Ancora dell'icona alla base della goccia
