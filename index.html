@@ -203,7 +203,7 @@
             marker.on('click', function() {
                 let card = document.querySelector(`.card[data-ristorante="${risto.nome}"]`);
                 card.scrollIntoView({ behavior: "smooth", block: "start" });
-                if (window.innerWidth < 1200) toggleMenu();
+                if (window.innerWidth < 800) toggleMenu();
             });
 
             // Crea la card
