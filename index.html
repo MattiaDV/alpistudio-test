@@ -226,7 +226,7 @@
                 const lat = parseFloat(this.getAttribute('data-lat'));
                 const lon = parseFloat(this.getAttribute('data-lon'));
                 map.setView([lat, lon], 14);
-                if (window.innerWidth < 1200) toggleMenu();
+                if (window.innerWidth < 800) toggleMenu();
             });
         });
     }
