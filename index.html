@@ -12,6 +12,7 @@
   <style>
     * {
       scroll-behavior: smooth;
+      font-family: sans-serif;
     }
     body, html {
       margin: 0;
@@ -78,6 +79,7 @@
 
     .card-body {
       padding: 20px;
+      font-size: 14px;
     }
 
     .elencoStatico div {
@@ -88,6 +90,11 @@
       max-width: 100%;
       cursor: pointer;
       box-shadow: 0px 4px 16px rgba(0.1, 0.1, 0.1, 0.500);
+    }
+
+    .title_risto {
+      font-weight: 600;
+      font-size: 16px;
     }
 
     @media screen and (max-width: 800px) {
@@ -149,11 +156,10 @@
     }).addTo(map);
 
     let ristoranti = [
-      { nome: "Ristorante 1", descrizione: "Descrizione del Ristorante 1", foto: "img/risto.jpg", valutazione: 3, indirizzo: "Via Roma, 1, Cagliari, Italia" },
-      { nome: "Ristorante 2", descrizione: "Descrizione del Ristorante 2", foto: "img/risto.jpg", valutazione: 2, indirizzo: "Corso Vittorio Emanuele, 10, Sassari, Italia" },
-      { nome: "Ristorante 3", descrizione: "Descrizione del Ristorante 3", foto: "img/risto.jpg", valutazione: 5, indirizzo: "Piazza Castello, Torino, Italia" },
-      { nome: "Ristorante 4", descrizione: "Descrizione del Ristorante 4", foto: "img/risto.jpg", valutazione: 4, indirizzo: "Via Isonzo 20, Nuoro, Italia" },
-      { nome: "Ristorante 5", descrizione: "Descrizione del Ristorante 5", foto: "img/risto.jpg", valutazione: 5, indirizzo: "Via Roma, 15, Nuoro, Italia" }
+      { nome: "OH CRISPA!", descrizione: "Il primogenito di Tina, ristoratrice di LAO: rapporto qualità-prezzo incredibile, parliamo di street food cinese in un locale molto veloce e dinamico. Potreste trovare un po’ di coda, ma scorre velocemente, tempo di uno spritz sorseggiato tra una chiacchiera e l’altra.", foto: "https://le-strade.com/wp-content/uploads/2019/07/Oh-cripsa-4-1024x683.jpg", valutazione: 5, indirizzo: "Via Belfiore, 16 bis/D, 10125 Torino TO" },
+      { nome: "IL VECCHIO ZUAVO", descrizione: "Ristorante consigliatomi dal mio amico Andrea, innamorata non appena sono entrata nel cortile, immensamente sua non appena ho visto che a entrare, prima di me, c’erano due coppie meravigliose sulla settantina, vestiti da festa e di una dolcezza infinita. Un piccolo angolo di paradiso che nell’arredo è rimasto ancorato a quel passato che ha il suono di un pavimento in legno cigolante e quel profumo di paglia delle sedie intrecciate decenni fa. Vitello tonnato che si scioglie in bocca, anche se la salsa potrebbe essere più incisiva. INCREDIBILI gli agnolotti al sugo d’arrosto. Bavetta speziata altrettanto memorabile.", foto: "https://media-cdn.tripadvisor.com/media/photo-s/10/c9/dd/c5/l-ingresso.jpg", valutazione: 4, indirizzo: "Via Roma, 23, 12100 Cuneo CN" },
+      { nome: "SORSO", descrizione: "Vineria che mi hanno fatto scoprire Giulietta e Ale, sul vino non mi soffermo troppo perché ci sono tantissime etichette interessanti che Andrea e Veronica, la proprietaria, sapranno raccontarvi al meglio. Da sottolineare e apprezzare anche l’accompagnamento della cucina, semplice ma con prodotti ottimi. Aperitivo qui che si trasforma in una cena d’estate perfetta. Special mention alla focaccina calda.", foto: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQhfWZtuigGHpxZmgwn6UlCkLeYtXzzZkPdGQ&s", valutazione: 4, indirizzo: "Via S. Massimo, 42, 10123 Torino TO" },
+      { nome: "MARIGOLD", descrizione: "Bakery/colazione/bruch/pranzo davvero, davvero ottimi. Prezzi non proprio economicissimi, ma in linea con locali di questo tipo. Ricalca un po’ quei forni del Nord Europa, di Copenaghen per cui, come sapete, ho un debole. I sapori però sono decisi come piacciono a noi. Andateci per il brunch. Se siete amanti degli specialty coffee, segnatevelo.", foto: "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/2e/1e/87/c3/veduta-dell-interno.jpg?w=400&h=300&s=1", valutazione: 5, indirizzo: "Via Giovanni da Empoli, 37, 00154 Roma RM" }
     ];
 
     // Icona personalizzata
@@ -204,7 +210,7 @@
 
             // Aggiungi marker alla mappa
             let marker = L.marker([coords.lat, coords.lon], { icon: redIcon })
-                .bindPopup(`<b>${risto.nome}</b><br><p>${risto.descrizione}</p><br><a class = "card_to_view" href = "#${risto.nome.replace(/ /g, '')}" onclick = "openMenu()">Scopri di più</a>`)
+                .bindPopup(`<b>${risto.nome}</b><br><p>${risto.indirizzo}</p><p>${'⭐'.repeat(risto.valutazione)} / 5⭐</p><br><a class = "card_to_view" href = "#${risto.nome.replace(/ /g, '')}" onclick = "openMenu()">Scopri di più</a>`)
                 .addTo(map);
             markers.push(marker);
 
@@ -220,9 +226,10 @@
                 <div class="card" id = "${risto.nome.replace(/ /g, '')}" style="width: 18rem;" data-ristorante="${risto.nome}" data-lat="${coords.lat}" data-lon="${coords.lon}">
                     <img src="${risto.foto}" class="card-img-top" alt="${risto.nome}">
                     <div class="card-body">
-                        <h5 class="card-title">${risto.nome}</h5>
+                        <h5 class="card-title"><span class = "title_risto">${risto.nome}</span></h5>
                         <p class="card-text">${risto.descrizione}</p>
-                        <p class="card-text">Valutazione: ${'⭐'.repeat(risto.valutazione)} / 5⭐</p>
+                        <p class = "card-text"> <span class = "title_risto">Indirizzo:</span> ${risto.indirizzo} </p>
+                        <p class="card-text"><span class = "title_risto">Valutazione:</span> ${'⭐'.repeat(risto.valutazione)} / 5⭐</p>
                     </div>
                 </div>
             `;
