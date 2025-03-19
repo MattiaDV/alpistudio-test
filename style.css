@@ -1,7 +1,131 @@
+
 * {
-    padding: 0;
-    margin: 0;
-    box-sizing: border-box;
-    font-family: sans-serif;
     scroll-behavior: smooth;
-}
+    font-family: "Montserrat", sans-serif;
+    font-optical-sizing: auto;
+    font-style: normal;
+  }
+  .card-img-top {
+    min-width: 100%;
+    max-width: 100%;
+  }
+  body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+  }
+  :root {
+    --red-palette: #aa182c;
+    --white-palette: #f9f6f6;
+  }
+  .elencoContainer {
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 30%;
+    display: flex;
+    z-index: 10000;
+    background: var(--red-palette);
+    justify-content: flex-start;
+    align-items: center;
+    flex-direction: column;
+    color: var(--white-palette);
+    overflow: scroll;
+    overflow-x: hidden;
+    box-shadow: 0px 4px 16px rgb(0, 0, 0)
+  }
+
+  .container {
+    display: none;
+    justify-content: center;
+    align-items: center;
+    gap: 0px;
+    height: 100%;
+    width: 100%;
+    padding: 15px;
+    font-family: "Montserrat", sans-serif;
+    font-optical-sizing: auto;
+    font-style: normal;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--white-palette);
+  }
+
+  .elencoStatico div img {
+    max-width: 100%;
+    border-top-left-radius: 26px;
+    border-top-right-radius: 26px;
+  }
+
+  .elencoStatico {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 20px;
+    padding-bottom: 40px;
+    padding-top: 20px;
+  }
+
+  .card-body {
+    padding: 20px;
+    font-size: 14px;
+  }
+
+  .elencoStatico div {
+    background: var(--white-palette);
+    color: var(--red-palette);
+    border-radius: 26px;
+    margin: 5px;
+    max-width: 100%;
+    cursor: pointer;
+    box-shadow: 0px 4px 16px rgba(0.1, 0.1, 0.1, 0.500);
+  }
+
+  .title_risto {
+    font-weight: 600;
+    font-size: 16px;
+  }
+
+  @media screen and (max-width: 800px) {
+    .elencoContainer {
+        width: 100%;
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        height: 60px;
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        color: black;
+        border-top-left-radius: 20px;
+        border-top-right-radius: 20px;
+    }
+
+    .container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 0px;
+        width: 100%;
+        padding: 15px;
+        font-family: "Montserrat", sans-serif;
+        font-optical-sizing: auto;
+        font-style: normal;
+        font-size: 16px;
+        font-weight: 600;
+        border-top-left-radius: 20px;
+        border-top-right-radius: 20px;
+        background: var(--red-palette);
+        border-top-left-radius: 20px;
+        border-top-right-radius: 20px;
+        color: var(--white-palette);
+    }
+  }
