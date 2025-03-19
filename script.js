@@ -8,8 +8,6 @@ var map = L.map('map').setView([40.8517, 12.2681], 5.5);
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
 
-    
-
     // Icona personalizzata
     var redIcon = L.icon({
         iconUrl: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
