@@ -39,7 +39,7 @@ async function getCoordinates(address) {
     }
 }
 
-function openMenu() {
+window.openMenu = function() {
     if (window.innerWidth < 800) {
     toggleMenu();
     }
