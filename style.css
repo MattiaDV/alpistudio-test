@@ -110,12 +110,13 @@
     }
 
     .container {
+        position: relative;
         display: flex;
         justify-content: center;
         align-items: center;
         gap: 0px;
         width: 100%;
-        padding: 15px;
+        padding: 30px;
         font-family: "Montserrat", sans-serif;
         font-optical-sizing: auto;
         font-style: normal;
@@ -127,5 +128,17 @@
         border-top-left-radius: 20px;
         border-top-right-radius: 20px;
         color: var(--white-palette);
+    }
+
+    .container .upper-part {
+      position: fixed;
+      bottom: 20px;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 26px;
+      background: var(--red-palette);
+      box-shadow: 0px 4px 16px rgba(0.1, 0.1, 0.1, 0.500);
     }
   }
