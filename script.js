@@ -21,24 +21,6 @@ var redIcon = L.icon({
     popupAnchor: [0, -50]
 });
 
-// Funzione per ottenere coordinate da un indirizzo
-async function getCoordinates(address) {
-    let url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`;
-    try {
-        let response = await fetch(url);
-        let data = await response.json();
-        if (data.length > 0) {
-            return { lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon) };
-        } else {
-            console.error(`Nessuna coordinata trovata per: ${address}`);
-            return null;
-        }
-    } catch (error) {
-        console.error("Errore nel geocoding: ", error);
-        return null;
-    }
-}
-
 window.openMenu = function() {
     if (window.innerWidth < 800) {
     toggleMenu();
@@ -51,21 +33,14 @@ async function loadRestaurants() {
     let containerElenco = document.querySelector('#elencoCard');
 
     for (let risto of ristoranti) {
-        let coords = await getCoordinates(risto.indirizzo);
-        if (!coords) continue; // Se non trova le coordinate, salta il ristorante
+        // Utilizza direttamente le coordinate lat e lon del ristorante
+        let coords = { lat: risto.lat, lon: risto.lon };
 
         // Aggiungi marker alla mappa
         let marker = L.marker([coords.lat, coords.lon], { icon: redIcon })
             .bindPopup(`<b>${risto.nome}</b><br><p>Prezzo: ${'$'.repeat(risto.prezzo)}</p><br><a class = "card_to_view" href = "#${risto.nome.replace(/ /g, '')}" onclick = "openMenu()">Scopri di più</a>`)
             .addTo(map);
         markers.push(marker);
-
-        // Aggiungi evento al marker
-        /* marker.on('click', function() {
-            let card = document.querySelector(`.card[data-ristorante="${risto.nome}"]`);
-            card.scrollIntoView({ behavior: "smooth", block: "start" });
-            if (window.innerWidth < 800) toggleMenu();
-        }); */
 
         // Crea la card
         let html = `
