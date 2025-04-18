@@ -27,6 +27,8 @@ window.openMenu = function() {
     }
 }
 
+let x = -1;
+
 // Funzione di ricerca
 let search_bar = document.getElementById('searchByName');
 
@@ -41,7 +43,9 @@ search_bar.addEventListener('keyup', function(e) {
         let risultati = ristoranti.filter(r =>
             r.nome.toLowerCase().includes(query) || r.citta.toLowerCase().includes(query)
         );
-
+        
+        x = -1;
+        openMenu();
         mostraRistoranti(risultati);
     });
 })
@@ -132,7 +136,6 @@ async function loadRestaurants() {
 }
 
 // Funzione per il toggle del menu laterale
-let x = -1;
 function toggleMenu() {
     x *= -1;
     newPage.style.height = x === -1 ? "60px" : "80vh";
