@@ -6,7 +6,8 @@ export let ristoranti = [
         prezzo: 1,
         indirizzo: "Via Belfiore, 16 bis/D, 10125 Torino TO",
         lat: 45.055956,
-        lon: 7.678911
+        lon: 7.678911,
+        citta: "Torino"
     },
     {
         nome: "IL VECCHIO ZUAVO",
@@ -15,7 +16,8 @@ export let ristoranti = [
         prezzo: 2,
         indirizzo: "Via Roma, 23, 12100 Cuneo CN",
         lat: 44.390872,
-        lon: 7.548315
+        lon: 7.548315,
+        citta: "Cuneo"
     },
     {
         nome: "SORSO",
@@ -24,7 +26,8 @@ export let ristoranti = [
         prezzo: 1,
         indirizzo: "Via S. Massimo, 42, 10123 Torino TO",
         lat: 45.062762,
-        lon: 7.689066
+        lon: 7.689066,
+        citta: "Torino"
     },
     {
         nome: "MARIGOLD",
@@ -33,7 +36,8 @@ export let ristoranti = [
         prezzo: 2,
         indirizzo: "Via Giovanni da Empoli, 37, 00154 Roma RM",
         lat: 41.872193,
-        lon: 12.485213
+        lon: 12.485213,
+        citta: "Roma"
     },
     {
         nome: "KADEH MEZE WINE BAR",
@@ -42,7 +46,8 @@ export let ristoranti = [
         prezzo: 2,
         indirizzo: "Via della Basilica, 1D, 10122 Torino TO",
         lat: 45.073611,
-        lon: 7.681389
+        lon: 7.681389,
+        citta: "Torino"
     },
     {
         nome: "PIATTINI caffè vini",
@@ -51,7 +56,8 @@ export let ristoranti = [
         prezzo: 1,
         indirizzo: "Via Corte d'Appello, 9/A, 10122 Torino TO",
         lat: 45.073056,
-        lon: 7.676944
+        lon: 7.676944,
+        citta: "Torino"
     },
     {
         nome: "IL CAVALLINO",
@@ -60,7 +66,8 @@ export let ristoranti = [
         prezzo: 3,
         indirizzo: "Via Abetone Inferiore, 1, 41053 Maranello MO",
         lat: 44.533333,
-        lon: 10.866667
+        lon: 10.866667,
+        citta: "Maranello"
     },
     { 
         nome: "DAU CILA", 
@@ -69,7 +76,8 @@ export let ristoranti = [
         prezzo: 3, 
         indirizzo: "Via San Giacomo, 65, 19017 Riomaggiore SP",
         lat: 44.0986774,
-        lon: 9.7378623
+        lon: 9.7378623,
+        citta: "Riomaggiore"
     },
     { 
         nome: "I GEMELLI", 
@@ -78,7 +86,8 @@ export let ristoranti = [
         prezzo: 1, 
         indirizzo: "Largo Beato Placido Riccardi, 4, 00146 Roma RM",
         lat: 41.8555573,
-        lon: 12.4767803
+        lon: 12.4767803,
+        citta: "Roma"
     },
     { 
         nome: "CROWN SHY", 
@@ -87,7 +96,8 @@ export let ristoranti = [
         prezzo: 3, 
         indirizzo: "70 Pine St Ground Floor, New York, NY 10005, Stati Uniti",
         lat: 40.7064733,
-        lon: -74.0077415
+        lon: -74.0077415,
+        citta: "New York"
     },
     { 
         nome: "OVERSTORY", 
@@ -96,7 +106,8 @@ export let ristoranti = [
         prezzo: 3, 
         indirizzo: "70 Pine St 64th Floor, New York, NY 10005, Stati Uniti",
         lat: 40.7064733,
-        lon: -74.0077415
+        lon: -74.0077415,
+        citta: "New York"
     },
     { 
         nome: "TIME AND TIDE", 
@@ -105,7 +116,8 @@ export let ristoranti = [
         prezzo: 3, 
         indirizzo: "48 E 26th St, New York, NY 10010, Stati Uniti",
         lat: 40.7431949,
-        lon: -73.9873693
+        lon: -73.9873693,
+        citta: "New York"
     },
     { 
         nome: "HER NAME IS HAN", 
@@ -114,6 +126,7 @@ export let ristoranti = [
         prezzo: 2, 
         indirizzo: "17 E 31st St, New York, NY 10016, Stati Uniti",
         lat: 40.7462316,
-        lon: -73.9847569
+        lon: -73.9847569,
+        citta: "New York"
     }
 ];

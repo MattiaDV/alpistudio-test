@@ -39,7 +39,7 @@ search_bar.addEventListener('keyup', function(e) {
 
         // Filtra i ristoranti in base al nome
         let risultati = ristoranti.filter(r =>
-            r.nome.toLowerCase().includes(query)
+            r.nome.toLowerCase().includes(query) || r.citta.toLowerCase().includes(query)
         );
 
         mostraRistoranti(risultati);
