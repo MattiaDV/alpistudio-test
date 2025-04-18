@@ -27,6 +27,69 @@ window.openMenu = function() {
     }
 }
 
+// Funzione di ricerca
+let search_bar = document.getElementById('searchByName');
+
+search_bar.addEventListener('keyup', function(e) {
+    
+    let search_bar = document.getElementById('searchByName');
+
+    search_bar.addEventListener('keyup', function () {
+        let query = search_bar.value.toLowerCase();
+
+        // Filtra i ristoranti in base al nome
+        let risultati = ristoranti.filter(r =>
+            r.nome.toLowerCase().includes(query)
+        );
+
+        mostraRistoranti(risultati);
+    });
+})
+
+function mostraRistoranti(lista) {
+    let markers = [];
+    let containerElenco = document.querySelector('#elencoCard');
+    containerElenco.innerHTML = ''; // svuota prima
+
+    // Rimuove tutti i marker precedenti
+    map.eachLayer(function (layer) {
+        if (layer instanceof L.Marker && layer.options.icon === redIcon) {
+            map.removeLayer(layer);
+        }
+    });
+
+    for (let risto of lista) {
+        let coords = { lat: risto.lat, lon: risto.lon };
+
+        let marker = L.marker([coords.lat, coords.lon], { icon: redIcon })
+            .bindPopup(`<b>${risto.nome}</b><br><p>Prezzo: ${'$'.repeat(risto.prezzo)}</p><br><a class = "card_to_view" href = "#${risto.nome.replace(/ /g, '')}" onclick = "openMenu()">Scopri di più</a>`)
+            .addTo(map);
+        markers.push(marker);
+
+        let html = `
+            <div class="card" id = "${risto.nome.replace(/ /g, '')}" style="width: 18rem;" data-ristorante="${risto.nome}" data-lat="${coords.lat}" data-lon="${coords.lon}">
+                <img src="${risto.foto}" class="card-img-top" alt="${risto.nome}">
+                <div class="card-body">
+                    <h5 class="card-title"><span class = "title_risto">${risto.nome}</span></h5>
+                    <p class="card-text">${risto.descrizione}</p>
+                    <p class = "card-text"> <span class = "title_risto">Indirizzo:</span> ${risto.indirizzo} </p>
+                    <p class="card-text"><span class = "title_risto">Prezzo:</span> ${'$'.repeat(risto.prezzo)}</p>
+                </div>
+            </div>
+        `;
+        containerElenco.innerHTML += html;
+    }
+
+    document.querySelectorAll('.card').forEach(card => {
+        card.addEventListener('click', function () {
+            const lat = parseFloat(this.getAttribute('data-lat'));
+            const lon = parseFloat(this.getAttribute('data-lon'));
+            map.setView([lat, lon], 14);
+            if (window.innerWidth < 800) toggleMenu();
+        });
+    });
+}
+
 // Funzione per caricare i ristoranti con coordinate
 async function loadRestaurants() {
     let markers = [];
